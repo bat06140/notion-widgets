@@ -42,12 +42,6 @@ jobs:
         id: ip
         uses: haythem/public-ip@v1.3
 
-      - name: Remove all whitelisted IPs
-        run: |
-          curl -sm 45 \
-            -H 'Authorization: cpanel ${{ secrets.CPANEL_USERNAME }}:${{ secrets.CPANEL_API_TOKEN }}' \
-            'https://${{ secrets.CPANEL_SERVER }}:2083/execute/SshWhitelist/remove_all'
-
       - name: Whitelist runner IP
         run: |
           curl -sm 45 \
