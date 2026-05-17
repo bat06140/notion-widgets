@@ -62,7 +62,7 @@ const ClockTile = ({
 };
 
 const FlipClock = ({
-  layout = "square",
+  layout = "full",
   accessGranted = false,
   allowThemeEditor = true,
   showBranding,

@@ -6,11 +6,11 @@ import {
   resolveWidgetLayoutFromCookie,
 } from "../src/lib/view-config.js";
 
-test("resolveAppView uses the selected widget with square layout by default", () => {
+test("resolveAppView uses the selected widget with full layout by default", () => {
   assert.deepEqual(resolveAppView("?widget=clock"), {
     kind: "widget",
     widget: "clock",
-    layout: "square",
+    layout: "full",
   });
 });
 
@@ -18,7 +18,7 @@ test("resolveAppView ignores the layout query parameter", () => {
   assert.deepEqual(resolveAppView("?widget=deadline&layout=full"), {
     kind: "widget",
     widget: "deadline",
-    layout: "square",
+    layout: "full",
   });
 });
 
@@ -32,7 +32,7 @@ test("resolveAppView falls back to the env widget when the url does not specify 
   assert.deepEqual(resolveAppView("", "deadline"), {
     kind: "widget",
     widget: "deadline",
-    layout: "square",
+    layout: "full",
   });
 });
 
@@ -40,7 +40,7 @@ test("resolveAppView uses the server runtime widget when the url does not specif
   assert.deepEqual(resolveAppView("", "clock"), {
     kind: "widget",
     widget: "clock",
-    layout: "square",
+    layout: "full",
   });
 });
 
@@ -48,7 +48,7 @@ test("resolveAppView uses the widget pathname when the query does not specify on
   assert.deepEqual(resolveAppView("", undefined, "/clock"), {
     kind: "widget",
     widget: "clock",
-    layout: "square",
+    layout: "full",
   });
 });
 
@@ -56,7 +56,7 @@ test("resolveAppView maps deadline pathname to the deadline widget", () => {
   assert.deepEqual(resolveAppView("", undefined, "/deadline"), {
     kind: "widget",
     widget: "deadline",
-    layout: "square",
+    layout: "full",
   });
 });
 
@@ -64,7 +64,7 @@ test("resolveAppView falls back to calendar for unknown widget and layout values
   assert.deepEqual(resolveAppView("?widget=unknown&layout=wide"), {
     kind: "widget",
     widget: "calendar",
-    layout: "square",
+    layout: "full",
   });
 });
 
@@ -72,7 +72,7 @@ test("resolveAppView no longer returns a license flag", () => {
   assert.deepEqual(resolveAppView("?widget=clock"), {
     kind: "widget",
     widget: "clock",
-    layout: "square",
+    layout: "full",
   });
 });
 
@@ -80,7 +80,7 @@ test("resolveAppView ignores the license query param for access", () => {
   assert.deepEqual(resolveAppView("?widget=calendar&license=ABC-123"), {
     kind: "widget",
     widget: "calendar",
-    layout: "square",
+    layout: "full",
   });
 });
 
@@ -89,6 +89,10 @@ test("resolveWidgetLayoutFromCookie uses the persisted layout for premium users"
     resolveWidgetLayoutFromCookie("widgetLayout=full", true),
     "full"
   );
+});
+
+test("resolveWidgetLayoutFromCookie defaults premium users to full layout", () => {
+  assert.equal(resolveWidgetLayoutFromCookie("", true), "full");
 });
 
 test("resolveWidgetLayoutFromCookie defaults freemium users to full layout", () => {

@@ -61,7 +61,7 @@ export const CenteredPopover = ({
   onPopTrigger,
   onClickOutside,
   children,
-  layout = "square",
+  layout = "full",
   purchaseUrl = DEFAULT_WIDGET_PURCHASE_URL,
   onLayoutChange,
 }: Props) => {

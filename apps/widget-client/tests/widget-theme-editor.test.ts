@@ -88,6 +88,20 @@ test("WidgetThemeEditor premium settings show an editable layout control", () =>
   assert.match(markup, /aria-pressed="true">Full/);
 });
 
+test("WidgetThemeEditor shows full before square in the layout control", () => {
+  const markup = renderWithTheme(
+    React.createElement(WidgetThemeEditor, {
+      mode: "premium",
+      purchaseUrl: DEFAULT_WIDGET_PURCHASE_URL,
+      initialOpen: true,
+      layout: "full",
+      onLayoutChange: () => undefined,
+    })
+  );
+
+  assert.ok(markup.indexOf(">Full<") < markup.indexOf(">Square<"));
+});
+
 test("WidgetThemeEditor open state no longer renders modal header or cancel button", () => {
   const markup = renderWithTheme(
     React.createElement(WidgetThemeEditor, {

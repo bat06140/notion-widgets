@@ -9,7 +9,7 @@ import {
 import { DEFAULT_WIDGET_PURCHASE_URL } from "../lib/widget-access.js";
 
 export const Deadline = ({
-  layout = "square",
+  layout = "full",
   accessGranted = false,
   allowThemeEditor = true,
   showBranding,

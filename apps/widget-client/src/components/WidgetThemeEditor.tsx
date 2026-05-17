@@ -142,7 +142,7 @@ const LayoutControl = ({
         )}
       </div>
       <div className="mt-[8px] grid grid-cols-2 gap-[4px] rounded-[8px] border border-black/10 bg-white/90 p-[2px]">
-        {(["square", "full"] as const).map((value) => {
+        {(["full", "square"] as const).map((value) => {
           const isActive = layout === value;
           const text = value === "square" ? squareLabel : fullLabel;
           const optionClassName = cn(
@@ -221,7 +221,7 @@ export const WidgetThemeEditor = ({
   paletteButtonClassName,
   initialOpen = false,
   initialActiveColorKey = null,
-  layout = "square",
+  layout = "full",
   onLayoutChange,
 }: {
   mode: ThemeEditorMode;

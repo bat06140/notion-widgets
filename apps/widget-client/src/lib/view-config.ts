@@ -3,6 +3,7 @@ import type { WidgetKey } from "@repo/shared";
 export type { WidgetKey } from "@repo/shared";
 export type WidgetLayout = "square" | "full";
 export const WIDGET_LAYOUT_COOKIE_NAME = "widgetLayout";
+export const DEFAULT_WIDGET_LAYOUT: WidgetLayout = "full";
 
 export type AppView =
   | {
@@ -66,7 +67,7 @@ export function resolveAppView(
   return {
     kind: "widget",
     widget,
-    layout: "square",
+    layout: DEFAULT_WIDGET_LAYOUT,
   };
 }
 
@@ -84,7 +85,7 @@ export function resolveWidgetLayoutFromCookie(
     .find((part) => part.startsWith(`${WIDGET_LAYOUT_COOKIE_NAME}=`))
     ?.slice(WIDGET_LAYOUT_COOKIE_NAME.length + 1);
 
-  return isWidgetLayout(layout) ? layout : "square";
+  return isWidgetLayout(layout) ? layout : DEFAULT_WIDGET_LAYOUT;
 }
 
 export function buildWidgetLayoutCookie(

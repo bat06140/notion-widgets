@@ -18,7 +18,7 @@ import { getBrowserLocale, getCalendarWeekdayLabels } from "../lib/locale.js";
 
 const Calendar = ({
   onDateSelected,
-  layout = "square",
+  layout = "full",
   accessGranted = false,
   allowThemeEditor = true,
   showBranding,
