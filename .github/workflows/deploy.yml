@@ -90,16 +90,33 @@ jobs:
              npm ci && \
              npm run build && \
              rm -rf apps/widget-server/node_modules && \
-             mkdir -p apps/widget-server/tmp && \
-             touch apps/widget-server/tmp/restart.txt"
+             mkdir -p tmp apps/widget-server/tmp && \
+             touch tmp/restart.txt apps/widget-server/tmp/restart.txt && \
+             ls -l tmp/restart.txt apps/widget-server/tmp/restart.txt"
 
       - name: Cleanup SSH key
         if: always()
         run: rm -fr ~/.ssh
 
       - name: Remove runner IP from whitelist
-        if: always()
+        if: always() && steps.ip.outputs.ipv4 != ''
         run: |
-          curl -sm 45 \
-            -H 'Authorization: cpanel ${{ secrets.CPANEL_USERNAME }}:${{ secrets.CPANEL_API_TOKEN }}' \
-            'https://${{ secrets.CPANEL_SERVER }}:2083/execute/SshWhitelist/remove?address=${{ steps.ip.outputs.ipv4 }}'
+          set -euo pipefail
+
+          remove_whitelist_entry() {
+            local direction="$1"
+            local response
+
+            response=$(curl -sm 45 \
+              -H 'Authorization: cpanel ${{ secrets.CPANEL_USERNAME }}:${{ secrets.CPANEL_API_TOKEN }}' \
+              'https://${{ secrets.CPANEL_SERVER }}:2083/execute/SshWhitelist/remove?address=${{ steps.ip.outputs.ipv4 }}&port=22&direction='"${direction}")
+
+            echo "$response"
+
+            echo "$response" | jq -e \
+              '.status == 1 or ((.errors // []) | join(" ") | contains("existe pas"))' \
+              >/dev/null
+          }
+
+          remove_whitelist_entry in
+          remove_whitelist_entry out
