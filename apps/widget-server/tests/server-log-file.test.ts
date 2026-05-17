@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import {
@@ -26,6 +26,8 @@ test("installConsoleLogFileWriter appends console logs to server.log in the app 
 
   try {
     const restore = installConsoleLogFileWriter({ rootDir, target });
+
+    assert.equal(existsSync(path.join(rootDir, "server.log")), true);
 
     target.info("server started");
     target.error(new Error("boot failed"));

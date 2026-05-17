@@ -43,6 +43,8 @@ export function installConsoleLogFileWriter({
   fileName?: string;
 }) {
   const filePath = path.join(rootDir, fileName);
+  appendFileSync(filePath, "", "utf8");
+
   const originals: Record<ConsoleLogLevel, (...values: unknown[]) => void> = {
     log: target.log.bind(target),
     info: target.info.bind(target),
