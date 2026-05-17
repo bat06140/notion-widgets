@@ -9,6 +9,10 @@ import {
   isLicenseDebugEnabled,
   logStartupDiagnostics,
 } from "./logging/license-debug.js";
+import {
+  installConsoleLogFileWriter,
+  isServerLogFileEnabled,
+} from "./logging/server-log-file.js";
 
 function resolvePackageRoot(fromDir: string) {
   let currentDir = fromDir;
@@ -88,6 +92,9 @@ export async function startServer({
 }: CreateAppOptions & { port?: number | string } = {}) {
   const { createApp } = await import("./app.js");
   const resolvedAssets = resolveWidgetAssetPaths({ templatePath, staticDir });
+  const restoreConsoleLogFileWriter = isServerLogFileEnabled()
+    ? installConsoleLogFileWriter({ rootDir: packageRoot })
+    : undefined;
   const debugLogger = createDebugLogger(logger);
 
   if (debugLicenses) {
@@ -111,7 +118,13 @@ export async function startServer({
     const nextServer = app.listen(port, () => {
       setImmediate(() => resolve(nextServer));
     });
-    nextServer.once("error", reject);
+    if (restoreConsoleLogFileWriter) {
+      nextServer.once("close", restoreConsoleLogFileWriter);
+    }
+    nextServer.once("error", (error: Error) => {
+      restoreConsoleLogFileWriter?.();
+      reject(error);
+    });
   });
 }
 
