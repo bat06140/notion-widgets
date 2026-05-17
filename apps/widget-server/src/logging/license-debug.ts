@@ -38,7 +38,7 @@ export function logStartupDiagnostics({
     [
       "[license-debug] startup",
       `port=${port}`,
-      `GUMROAD_PRODUCT_ID=${process.env.GUMROAD_PRODUCT_ID ? "set" : "missing"}`,
+      `GUMROAD_BUNDLE_PRODUCT_ID=${process.env.GUMROAD_BUNDLE_PRODUCT_ID ? "set" : "missing"}`,
       `WIDGET_TEMPLATE_PATH=${templatePath ? "set" : "missing"}`,
       `WIDGET_STATIC_DIR=${staticDir ? "set" : "missing"}`,
     ].join(" ")

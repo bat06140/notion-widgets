@@ -21,7 +21,7 @@ export function WidgetPage() {
   const view = resolveAppView(location.search, undefined, location.pathname);
   const widget = getWidgetFromPathname(location.pathname);
   const [access, setAccess] = useState<WidgetAccessState | null>(null);
-  const [layout, setLayout] = useState<WidgetLayout>("square");
+  const [layout, setLayout] = useState<WidgetLayout>("full");
 
   useEffect(() => {
     let cancelled = false;
@@ -31,6 +31,7 @@ export function WidgetPage() {
         accessGranted: false,
         purchaseUrl: DEFAULT_WIDGET_PURCHASE_URL,
       });
+      setLayout("full");
       return () => {
         cancelled = true;
       };
@@ -44,7 +45,7 @@ export function WidgetPage() {
         setAccess(nextAccess);
         setLayout(
           typeof document === "undefined"
-            ? "square"
+            ? resolveWidgetLayoutFromCookie("", nextAccess.accessGranted)
             : resolveWidgetLayoutFromCookie(
                 document.cookie,
                 nextAccess.accessGranted,

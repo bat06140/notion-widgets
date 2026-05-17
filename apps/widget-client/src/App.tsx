@@ -7,7 +7,7 @@ function App() {
       <Route path="/" element={<Navigate to="/calendar" replace />} />
       <Route path="/calendar" element={<WidgetPage />} />
       <Route path="/clock" element={<WidgetPage />} />
-      <Route path="/days-remaining" element={<WidgetPage />} />
+      <Route path="/deadline" element={<WidgetPage />} />
     </Routes>
   );
 }

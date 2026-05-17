@@ -9,8 +9,8 @@ export function getWidgetFromPathname(pathname: string): WidgetKey | undefined {
     return "clock";
   }
 
-  if (pathname === "/days-remaining") {
-    return "daysRemaining";
+  if (pathname === "/deadline") {
+    return "deadline";
   }
 
   return undefined;
@@ -25,7 +25,7 @@ export function getWidgetPath(widget: WidgetKey) {
     return "/clock";
   }
 
-  return "/days-remaining";
+  return "/deadline";
 }
 
 export function isWidgetPathname(pathname: string) {

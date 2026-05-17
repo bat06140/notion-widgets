@@ -16,10 +16,10 @@ test("fingerprintLicense masks plaintext license values", () => {
 test("logStartupDiagnostics reports env presence without leaking secrets", () => {
   const logs: string[] = [];
   const previousEnv = {
-    GUMROAD_PRODUCT_ID: process.env.GUMROAD_PRODUCT_ID,
+    GUMROAD_BUNDLE_PRODUCT_ID: process.env.GUMROAD_BUNDLE_PRODUCT_ID,
   };
 
-  process.env.GUMROAD_PRODUCT_ID = "super-secret-id";
+  process.env.GUMROAD_BUNDLE_PRODUCT_ID = "super-secret-id";
 
   try {
     logStartupDiagnostics({
@@ -33,13 +33,16 @@ test("logStartupDiagnostics reports env presence without leaking secrets", () =>
       staticDir: "/tmp/static",
     });
   } finally {
-    if (previousEnv.GUMROAD_PRODUCT_ID === undefined) delete process.env.GUMROAD_PRODUCT_ID;
-    else process.env.GUMROAD_PRODUCT_ID = previousEnv.GUMROAD_PRODUCT_ID;
+    if (previousEnv.GUMROAD_BUNDLE_PRODUCT_ID === undefined) {
+      delete process.env.GUMROAD_BUNDLE_PRODUCT_ID;
+    } else {
+      process.env.GUMROAD_BUNDLE_PRODUCT_ID = previousEnv.GUMROAD_BUNDLE_PRODUCT_ID;
+    }
   }
 
   const output = logs.join("\n");
   assert.match(output, /\[license-debug\] startup/);
-  assert.match(output, /GUMROAD_PRODUCT_ID=set/);
+  assert.match(output, /GUMROAD_BUNDLE_PRODUCT_ID=set/);
   assert.match(output, /WIDGET_TEMPLATE_PATH=set/);
   assert.match(output, /WIDGET_STATIC_DIR=set/);
   assert.doesNotMatch(output, /super-secret-id/);

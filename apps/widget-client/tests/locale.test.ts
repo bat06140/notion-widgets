@@ -59,10 +59,10 @@ test("translation set localizes visible copy and keeps the J- widget label in bo
   const english = getTranslationSet("en");
 
   assert.equal(french.widgetOptions.calendar, "Calendrier");
-  assert.equal(french.widgetOptions.daysRemaining, "J-");
+  assert.equal(french.widgetOptions.deadline, "J-");
   assert.equal(french.widgetOptions.clock, "Horloge");
   assert.equal(english.widgetOptions.calendar, "Calendar");
-  assert.equal(english.widgetOptions.daysRemaining, "J-");
+  assert.equal(english.widgetOptions.deadline, "J-");
   assert.equal(english.widgetOptions.clock, "Clock");
   assert.equal(french.themeEditor.title, "Choisir une couleur");
   assert.equal(english.themeEditor.title, "Choose a color");

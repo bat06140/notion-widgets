@@ -139,6 +139,7 @@ test("checkAccess fails when productId is missing", async () => {
   const service = createLicenseService({
     cacheTtlSeconds: 3600,
     productId: undefined, // Missing!
+    bundleProductId: undefined,
     verifyLicense: async () => ({ success: true, purchase: {} }),
   });
 
@@ -190,6 +191,28 @@ test("checkAccess checks multiple product IDs and grants access if at least one 
   assert.deepEqual(await service.checkAccess("VALID-BUNDLE-KEY"), { access: true });
 });
 
+test("checkAccess verifies the bundle product for every widget", async () => {
+  const productIds: string[] = [];
+  const service = createLicenseService({
+    bundleProductId: "bundle-product",
+    verifyLicense: async (productId, licenseKey) => {
+      productIds.push(productId);
+      if (productId === "bundle-product" && licenseKey === "VALID-BUNDLE-KEY") {
+        return { success: true, purchase: {} };
+      }
+      return { success: false };
+    },
+  });
+
+  assert.deepEqual(await service.checkAccess("VALID-BUNDLE-KEY", { widget: "calendar" }), {
+    access: true,
+  });
+  assert.deepEqual(await service.checkAccess("VALID-BUNDLE-KEY", { widget: "deadline" }), {
+    access: true,
+  });
+  assert.deepEqual(productIds, ["bundle-product"]);
+});
+
 test("checkAccess default cacheTtlSeconds is 86400 (1 day)", async () => {
   // We can test this by checking the default value when not provided, though it's internal.
   // Let's test the default TTL by mocking the cache? Since we can't easily mock NodeCache,
@@ -198,4 +221,3 @@ test("checkAccess default cacheTtlSeconds is 86400 (1 day)", async () => {
   const service = createLicenseService();
   // We'll trust the implementation to set 86400.
 });
-

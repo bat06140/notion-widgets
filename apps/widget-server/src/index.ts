@@ -1,14 +1,14 @@
-import "dotenv/config";
+import dotenv from "dotenv";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { pathToFileURL } from "node:url";
 import path from "node:path";
+import type { CreateAppOptions } from "./app.js";
 import {
   createDebugLogger,
   isLicenseDebugEnabled,
   logStartupDiagnostics,
 } from "./logging/license-debug.js";
-import { createApp, type CreateAppOptions } from "./app.js";
 
 function resolvePackageRoot(fromDir: string) {
   let currentDir = fromDir;
@@ -27,6 +27,25 @@ function resolvePackageRoot(fromDir: string) {
   }
 }
 
+const moduleDir = path.dirname(fileURLToPath(import.meta.url));
+const packageRoot = resolvePackageRoot(moduleDir);
+
+export function loadEnvironmentFiles({
+  rootDir = packageRoot,
+  nodeEnv = process.env.NODE_ENV,
+}: {
+  rootDir?: string;
+  nodeEnv?: string;
+} = {}) {
+  dotenv.config({ path: path.join(rootDir, ".env") });
+
+  if (nodeEnv !== "production") {
+    dotenv.config({ path: path.join(rootDir, ".env.local"), override: true });
+  }
+}
+
+loadEnvironmentFiles();
+
 export function resolveWidgetAssetPaths({
   templatePath = process.env.WIDGET_TEMPLATE_PATH,
   staticDir = process.env.WIDGET_STATIC_DIR,
@@ -34,8 +53,6 @@ export function resolveWidgetAssetPaths({
   templatePath?: string;
   staticDir?: string;
 } = {}) {
-  const serverDir = path.dirname(fileURLToPath(import.meta.url));
-  const packageRoot = resolvePackageRoot(serverDir);
   const defaultStaticDir = path.resolve(packageRoot, "../widget-client/dist");
   const resolveAssetPath = (value: string) =>
     path.isAbsolute(value) ? value : path.resolve(packageRoot, value);
@@ -69,6 +86,7 @@ export async function startServer({
   logger,
   ...options
 }: CreateAppOptions & { port?: number | string } = {}) {
+  const { createApp } = await import("./app.js");
   const resolvedAssets = resolveWidgetAssetPaths({ templatePath, staticDir });
   const debugLogger = createDebugLogger(logger);
 

@@ -4,7 +4,7 @@ import {
   type WidgetRuntime,
 } from "../src/index";
 
-const widgetKeys: WidgetKey[] = ["calendar", "daysRemaining", "clock"];
+const widgetKeys: WidgetKey[] = ["calendar", "deadline", "clock"];
 
 const runtime: WidgetRuntime = {
   widget: widgetKeys[0],

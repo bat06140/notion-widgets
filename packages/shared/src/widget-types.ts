@@ -1,1 +1,1 @@
-export type WidgetKey = "calendar" | "daysRemaining" | "clock";
+export type WidgetKey = "calendar" | "deadline" | "clock";

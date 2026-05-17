@@ -1,5 +1,5 @@
 import Calendar from "./Calendar.js";
-import { DaysRemaining } from "./DaysRemaining.js";
+import { Deadline } from "./Deadline.js";
 import FlipClock from "./FlipClock.js";
 import { DEFAULT_WIDGET_PURCHASE_URL } from "../lib/widget-access.js";
 import { AppLocale, getTranslationSet } from "../lib/locale.js";
@@ -12,7 +12,7 @@ export const getWidgetOptions = (
 
   return [
     { value: "calendar", label: translations.widgetOptions.calendar },
-    { value: "daysRemaining", label: translations.widgetOptions.daysRemaining },
+    { value: "deadline", label: translations.widgetOptions.deadline },
     { value: "clock", label: translations.widgetOptions.clock },
   ];
 };
@@ -43,9 +43,9 @@ export const renderWidget = ({
           onLayoutChange={onLayoutChange}
         />
       );
-    case "daysRemaining":
+    case "deadline":
       return (
-        <DaysRemaining
+        <Deadline
           layout={layout}
           accessGranted={accessGranted}
           allowThemeEditor={allowThemeEditor}

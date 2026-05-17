@@ -1,4 +1,4 @@
-# Days Remaining Monorepo
+# Notion Widgets Monorepo
 
 This repository now uses a workspace-only `npm` + `turbo` layout.
 
@@ -14,7 +14,7 @@ Useful commands from the repository root:
 - `npm test`
 - `npm run dev`
 - `npm run dev:calendar`
-- `npm run dev:days-remaining`
+- `npm run dev:deadline`
 - `npm run dev:clock`
 - `npm start`
 

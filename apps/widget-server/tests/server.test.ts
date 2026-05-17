@@ -40,10 +40,10 @@ async function withServer(
 }
 
 test("widget access api returns denied access without leaking the license", async () => {
-  let receivedLicense: string | undefined;
+  let receivedInput: { license: string | undefined; widget?: string } | undefined;
   const app = createApp({
-    checkAccess: async (license: string | undefined) => {
-      receivedLicense = license;
+    checkAccess: async (license: string | undefined, options?: { widget?: string }) => {
+      receivedInput = { license, widget: options?.widget };
       return {
         access: false,
         reason: "Licence introuvable",
@@ -59,7 +59,7 @@ test("widget access api returns denied access without leaking the license", asyn
     const payload = await response.json();
 
     assert.equal(response.status, 200);
-    assert.equal(receivedLicense, "BAD-KEY");
+    assert.deepEqual(receivedInput, { license: "BAD-KEY", widget: "calendar" });
     assert.deepEqual(payload, {
       accessGranted: false,
       purchaseUrl: "https://atomicskills.academy/widgets-notion/",
@@ -81,5 +81,57 @@ test("static shell serves the frontend app for widget routes", async () => {
     assert.equal(response.status, 200);
     assert.match(responseHtml, /<div id="root"><\/div>/);
     assert.doesNotMatch(responseHtml, /"widget":"calendar"/);
+  });
+});
+
+test("static shell serves the frontend app for the deadline route", async () => {
+  const app = createApp({
+    checkAccess: async () => ({ access: true }),
+    htmlTemplate,
+  });
+
+  await withServer(app, async (baseUrl) => {
+    const response = await fetch(`${baseUrl}/deadline?license=BAD-KEY`);
+    const responseHtml = await response.text();
+
+    assert.equal(response.status, 200);
+    assert.match(responseHtml, /<div id="root"><\/div>/);
+  });
+});
+
+test("gumroad webhook route parses purchase webhooks and returns accepted", async () => {
+  let receivedPayload: Record<string, unknown> | undefined;
+  const app = createApp({
+    checkAccess: async () => ({ access: false, reason: "Licence manquante" }),
+    processGumroadWebhook: async (payload) => {
+      receivedPayload = payload;
+      return { status: "sent" };
+    },
+    htmlTemplate,
+  });
+
+  await withServer(app, async (baseUrl) => {
+    const response = await fetch(`${baseUrl}/api/gumroad/webhook`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        email: "buyer@example.com",
+        license_key: "SECRET-LICENSE",
+        product_id: "bundle-product",
+        sale_id: "sale-123",
+      }),
+    });
+    const payload = await response.json();
+
+    assert.equal(response.status, 202);
+    assert.deepEqual(payload, { ok: true });
+    assert.deepEqual(receivedPayload, {
+      email: "buyer@example.com",
+      license_key: "SECRET-LICENSE",
+      product_id: "bundle-product",
+      sale_id: "sale-123",
+    });
   });
 });

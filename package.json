@@ -1,5 +1,5 @@
 {
-  "name": "daysremaining",
+  "name": "notion-widgets",
   "private": true,
   "version": "0.0.0",
   "packageManager": "npm@11.4.1",
@@ -16,11 +16,11 @@
   "scripts": {
     "dev": "turbo run dev",
     "dev:calendar": "VITE_COMPONENT=calendar npm run dev --workspace=@repo/widget-client",
-    "dev:days-remaining": "VITE_COMPONENT=daysRemaining npm run dev --workspace=@repo/widget-client",
+    "dev:deadline": "VITE_COMPONENT=deadline npm run dev --workspace=@repo/widget-client",
     "dev:clock": "VITE_COMPONENT=clock npm run dev --workspace=@repo/widget-client",
     "build": "turbo run build",
     "build:calendar": "VITE_COMPONENT=calendar npm run build --workspace=@repo/widget-client",
-    "build:days-remaining": "VITE_COMPONENT=daysRemaining npm run build --workspace=@repo/widget-client",
+    "build:deadline": "VITE_COMPONENT=deadline npm run build --workspace=@repo/widget-client",
     "start": "npm run start --workspace=@repo/widget-server",
     "test": "turbo run test",
     "test:server": "npm run test --workspace=@repo/widget-server",

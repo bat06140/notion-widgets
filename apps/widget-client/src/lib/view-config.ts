@@ -18,12 +18,12 @@ const FALLBACK_WIDGET: WidgetKey = "calendar";
 const PATH_WIDGETS: Readonly<Record<string, WidgetKey>> = {
   "/calendar": "calendar",
   "/clock": "clock",
-  "/days-remaining": "daysRemaining",
+  "/deadline": "deadline",
 };
 
 function isWidgetKey(value: string | null | undefined): value is WidgetKey {
   return (
-    value === "calendar" || value === "daysRemaining" || value === "clock"
+    value === "calendar" || value === "deadline" || value === "clock"
   );
 }
 
@@ -75,7 +75,7 @@ export function resolveWidgetLayoutFromCookie(
   accessGranted: boolean
 ): WidgetLayout {
   if (!accessGranted) {
-    return "square";
+    return "full";
   }
 
   const layout = cookieString

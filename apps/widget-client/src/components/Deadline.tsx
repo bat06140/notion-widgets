@@ -3,12 +3,12 @@ import { CenteredPopover } from "./CenteredPopover.js";
 import Calendar from "./Calendar.js";
 import { WidgetLayout } from "../lib/view-config.js";
 import {
-  formatDaysRemainingLabel,
-  getDaysRemainingFontScale,
-} from "../lib/days-remaining.js";
+  formatDeadlineLabel,
+  getDeadlineFontScale,
+} from "../lib/deadline.js";
 import { DEFAULT_WIDGET_PURCHASE_URL } from "../lib/widget-access.js";
 
-export const DaysRemaining = ({
+export const Deadline = ({
   layout = "square",
   accessGranted = false,
   allowThemeEditor = true,
@@ -25,7 +25,7 @@ export const DaysRemaining = ({
 }) => {
   const [showPop, setShowPop] = useState(false);
   const [targetDate, setTargetDate] = useState<Date>();
-  const [daysRemaining, setDaysRemaining] = useState<number>();
+  const [daysUntilDeadline, setDaysUntilDeadline] = useState<number>();
 
   const onDateSelected = (event: MouseEvent, date: Date) => {
     event.preventDefault();
@@ -36,7 +36,7 @@ export const DaysRemaining = ({
   };
 
   useEffect(() => {
-    const updateDaysRemaining = () => {
+    const updateDaysUntilDeadline = () => {
       if (!targetDate) {
         return;
       }
@@ -49,10 +49,10 @@ export const DaysRemaining = ({
 
       const timeDiff = target.valueOf() - today.valueOf();
       const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
-      setDaysRemaining(daysDiff);
+      setDaysUntilDeadline(daysDiff);
     };
 
-    updateDaysRemaining();
+    updateDaysUntilDeadline();
 
     const now = new Date();
     const midnight = new Date(now);
@@ -60,8 +60,8 @@ export const DaysRemaining = ({
     const timeUntilMidnight = midnight.getTime() - now.getTime();
 
     const midnightTimeout = setTimeout(() => {
-      updateDaysRemaining();
-      const dailyInterval = setInterval(updateDaysRemaining, 86400000);
+      updateDaysUntilDeadline();
+      const dailyInterval = setInterval(updateDaysUntilDeadline, 86400000);
       return () => clearInterval(dailyInterval);
     }, timeUntilMidnight);
 
@@ -78,12 +78,12 @@ export const DaysRemaining = ({
     }
   }, []);
 
-  const label = formatDaysRemainingLabel(daysRemaining);
+  const label = formatDeadlineLabel(daysUntilDeadline);
 
   return (
     <CenteredPopover
       textContent={label}
-      textFontScale={getDaysRemainingFontScale(label)}
+      textFontScale={getDeadlineFontScale(label)}
       showPop={showPop}
       layout={layout}
       accessGranted={accessGranted}

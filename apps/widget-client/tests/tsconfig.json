@@ -26,7 +26,7 @@
     "../src/lib/widget-theme.ts",
     "../src/lib/widget-access.ts",
     "../src/lib/calendar-theme.ts",
-    "../src/lib/days-remaining.ts",
+    "../src/lib/deadline.ts",
     "../src/lib/locale.ts"
   ]
 }

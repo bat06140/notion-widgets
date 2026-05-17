@@ -14,7 +14,7 @@ type ShowcasePanelKey = "primary" | "secondary" | "tertiary";
 const initialWidgets: Record<ShowcasePanelKey, WidgetKey> = {
   primary: "clock",
   secondary: "calendar",
-  tertiary: "daysRemaining",
+  tertiary: "deadline",
 };
 
 const panelOrder: ShowcasePanelKey[] = ["primary", "secondary", "tertiary"];

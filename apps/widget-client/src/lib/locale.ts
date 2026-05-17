@@ -69,7 +69,7 @@ const TRANSLATIONS = {
   fr: {
     widgetOptions: {
       calendar: "Calendrier",
-      daysRemaining: "J-",
+      deadline: "J-",
       clock: "Horloge",
     },
     showcase: {
@@ -109,7 +109,7 @@ const TRANSLATIONS = {
   en: {
     widgetOptions: {
       calendar: "Calendar",
-      daysRemaining: "J-",
+      deadline: "J-",
       clock: "Clock",
     },
     showcase: {

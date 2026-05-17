@@ -13,7 +13,7 @@ import {
 test("getWidgetFromPathname maps widget URLs to widget keys", () => {
   assert.equal(getWidgetFromPathname("/calendar"), "calendar");
   assert.equal(getWidgetFromPathname("/clock"), "clock");
-  assert.equal(getWidgetFromPathname("/days-remaining"), "daysRemaining");
+  assert.equal(getWidgetFromPathname("/deadline"), "deadline");
 });
 
 test("getWidgetFromPathname returns undefined for unknown routes", () => {
@@ -24,12 +24,13 @@ test("getWidgetFromPathname returns undefined for unknown routes", () => {
 test("getWidgetPath returns the canonical URL for each widget key", () => {
   assert.equal(getWidgetPath("calendar"), "/calendar");
   assert.equal(getWidgetPath("clock"), "/clock");
-  assert.equal(getWidgetPath("daysRemaining"), "/days-remaining");
+  assert.equal(getWidgetPath("deadline"), "/deadline");
 });
 
 test("isWidgetPathname only accepts widget page routes", () => {
   assert.equal(isWidgetPathname("/calendar"), true);
-  assert.equal(isWidgetPathname("/days-remaining"), true);
+  assert.equal(isWidgetPathname("/deadline"), true);
+  assert.equal(isWidgetPathname("/days-remaining"), false);
   assert.equal(isWidgetPathname("/api/widget-access"), false);
 });
 
