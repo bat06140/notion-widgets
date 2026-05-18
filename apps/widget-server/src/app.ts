@@ -51,6 +51,7 @@ export function createApp({
   staticDir,
   purchaseUrl,
   processGumroadWebhook,
+  logger,
 }: CreateAppOptions = {}) {
   const app = express();
   const spaIndex = loadSpaIndex({ htmlTemplate, templatePath });
@@ -71,7 +72,8 @@ export function createApp({
     ? { processPayload: processGumroadWebhook }
     : {
         acceptPayload: createGumroadWebhookProcessor({
-          sendActivationEmail: createSmtpActivationEmailSender(),
+          logger,
+          sendActivationEmail: createSmtpActivationEmailSender({ logger }),
         }).accept,
       };
   app.use(

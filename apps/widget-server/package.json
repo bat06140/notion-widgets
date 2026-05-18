@@ -17,7 +17,8 @@
     "dotenv": "^16.6.1",
     "express": "^5.2.1",
     "node-cache": "^5.1.2",
-    "nodemailer": "^8.0.7"
+    "nodemailer": "^8.0.7",
+    "pino": "^10.3.1"
   },
   "devDependencies": {
     "@types/node": "^20.14.2",

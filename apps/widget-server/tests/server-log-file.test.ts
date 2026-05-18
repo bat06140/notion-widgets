@@ -4,7 +4,7 @@ import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import {
-  installConsoleLogFileWriter,
+  createServerLogger,
   isServerLogFileEnabled,
 } from "../src/logging/server-log-file.js";
 
@@ -14,34 +14,47 @@ test("isServerLogFileEnabled enables file logging in development by default", ()
   assert.equal(isServerLogFileEnabled(undefined), false);
 });
 
-test("installConsoleLogFileWriter appends console logs to server.log in the app root", () => {
+test("createServerLogger writes pino logs to server.log in development", async () => {
   const rootDir = mkdtempSync(path.join(tmpdir(), "server-log-file-"));
-  const consoleCalls: Array<{ level: string; values: unknown[] }> = [];
-  const target = {
-    log: (...values: unknown[]) => consoleCalls.push({ level: "log", values }),
-    info: (...values: unknown[]) => consoleCalls.push({ level: "info", values }),
-    warn: (...values: unknown[]) => consoleCalls.push({ level: "warn", values }),
-    error: (...values: unknown[]) => consoleCalls.push({ level: "error", values }),
-  };
+  const filePath = path.join(rootDir, "server.log");
 
   try {
-    const restore = installConsoleLogFileWriter({ rootDir, target });
+    const logger = createServerLogger({ rootDir, nodeEnv: "development" });
 
-    assert.equal(existsSync(path.join(rootDir, "server.log")), true);
+    assert.equal(existsSync(filePath), true);
+    assert.equal(logger.level, "debug");
 
-    target.info("server started");
-    target.error(new Error("boot failed"));
-    target.log({ route: "/calendar" });
-    restore();
-    target.warn("after restore");
+    logger.debug("webhook received");
+    logger.info({ purchase: "sale-123" }, "email sent");
+    logger.flush();
+    await new Promise((resolve) => setTimeout(resolve, 20));
 
-    const output = readFileSync(path.join(rootDir, "server.log"), "utf8");
+    const output = readFileSync(filePath, "utf8");
+    const lines = output
+      .trim()
+      .split("\n")
+      .filter(Boolean)
+      .map((line) => JSON.parse(line) as Record<string, unknown>);
 
-    assert.equal(consoleCalls.length, 4);
-    assert.match(output, /\[info\] server started/);
-    assert.match(output, /\[error\] Error: boot failed/);
-    assert.match(output, /\[log\] {"route":"\/calendar"}/);
-    assert.doesNotMatch(output, /after restore/);
+    assert.equal(lines.length, 2);
+    assert.equal(lines[0]?.level, 20);
+    assert.equal(lines[0]?.msg, "webhook received");
+    assert.equal(lines[1]?.level, 30);
+    assert.equal(lines[1]?.msg, "email sent");
+    assert.equal(lines[1]?.purchase, "sale-123");
+  } finally {
+    rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("createServerLogger uses production level without creating server.log", () => {
+  const rootDir = mkdtempSync(path.join(tmpdir(), "server-log-file-"));
+
+  try {
+    const logger = createServerLogger({ rootDir, nodeEnv: "production" });
+
+    assert.equal(logger.level, "info");
+    assert.equal(existsSync(path.join(rootDir, "server.log")), false);
   } finally {
     rmSync(rootDir, { recursive: true, force: true });
   }

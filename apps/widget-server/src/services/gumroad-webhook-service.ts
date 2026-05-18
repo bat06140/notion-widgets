@@ -142,6 +142,37 @@ function purchaseIdFromPayload(payload: GumroadWebhookPayload) {
   );
 }
 
+function payloadKeys(payload: GumroadWebhookPayload) {
+  return Object.keys(payload).sort().join(",") || "none";
+}
+
+function logInvalidWebhook({
+  debugLogger,
+  purchaseId,
+  productId,
+  licenseFingerprint,
+  reason,
+  hasEmail,
+}: {
+  debugLogger: DebugLogger;
+  purchaseId: string;
+  productId: string;
+  licenseFingerprint: string;
+  reason: string;
+  hasEmail: boolean;
+}) {
+  debugLogger.warn(
+    [
+      "[gumroad-webhook] invalid",
+      `purchase=${purchaseId || "missing"}`,
+      `reason="${reason}"`,
+      `email=${hasEmail ? "set" : "missing"}`,
+      `product=${productId || "missing"}`,
+      `license=${licenseFingerprint}`,
+    ].join(" ")
+  );
+}
+
 export function createGumroadWebhookProcessor({
   bundleProductId = process.env.GUMROAD_BUNDLE_PRODUCT_ID,
   publicWidgetBaseUrl = process.env.PUBLIC_WIDGET_BASE_URL ??
@@ -165,19 +196,62 @@ export function createGumroadWebhookProcessor({
     const purchaseId = purchaseIdFromPayload(payload);
     const licenseFingerprint = fingerprintLicense(licenseKey);
 
+    debugLogger.debug(
+      [
+        "[gumroad-webhook] received",
+        `purchase=${purchaseId || "missing"}`,
+        `email=${email ? "set" : "missing"}`,
+        `product=${productId || "missing"}`,
+        `license=${licenseFingerprint}`,
+        `keys=${payloadKeys(payload)}`,
+      ].join(" ")
+    );
+
     if (!email) {
+      logInvalidWebhook({
+        debugLogger,
+        purchaseId,
+        productId,
+        licenseFingerprint,
+        reason: "email client manquant",
+        hasEmail: false,
+      });
       return { status: "invalid", reason: "email client manquant" };
     }
 
     if (!licenseKey) {
+      logInvalidWebhook({
+        debugLogger,
+        purchaseId,
+        productId,
+        licenseFingerprint,
+        reason: "license_key manquant",
+        hasEmail: true,
+      });
       return { status: "invalid", reason: "license_key manquant" };
     }
 
     if (!productId) {
+      logInvalidWebhook({
+        debugLogger,
+        purchaseId,
+        productId,
+        licenseFingerprint,
+        reason: "product_id manquant",
+        hasEmail: true,
+      });
       return { status: "invalid", reason: "product_id manquant" };
     }
 
     if (!purchaseId) {
+      logInvalidWebhook({
+        debugLogger,
+        purchaseId,
+        productId,
+        licenseFingerprint,
+        reason: "sale_id ou order_id manquant",
+        hasEmail: true,
+      });
       return { status: "invalid", reason: "sale_id ou order_id manquant" };
     }
 
@@ -192,6 +266,15 @@ export function createGumroadWebhookProcessor({
     });
 
     if (!isBundlePurchase) {
+      debugLogger.warn(
+        [
+          "[gumroad-webhook] product mismatch",
+          `purchase=${purchaseId}`,
+          `product=${productId}`,
+          `expectedBundle=${bundleProductId ? "set" : "missing"}`,
+          `license=${licenseFingerprint}`,
+        ].join(" ")
+      );
       return { status: "invalid", reason: "produit Gumroad inconnu" };
     }
     processedPurchases.set(purchaseId, true);
@@ -205,11 +288,36 @@ export function createGumroadWebhookProcessor({
     );
     const activationEmail = buildActivationEmail({ to: email, activationUrls });
 
+    debugLogger.debug(
+      [
+        "[gumroad-webhook] accepted",
+        `purchase=${purchaseId}`,
+        `product=${productId}`,
+        `activationUrls=${activationUrls.length}`,
+      ].join(" ")
+    );
+
     return {
       status: "accepted",
       send: async () => {
         try {
+          debugLogger.debug(
+            [
+              "[gumroad-webhook] email send started",
+              `purchase=${purchaseId}`,
+              `to=${email ? "set" : "missing"}`,
+              `activationUrls=${activationUrls.length}`,
+            ].join(" ")
+          );
           await sendActivationEmail(activationEmail);
+          debugLogger.info(
+            [
+              "[gumroad-webhook] email sent",
+              `purchase=${purchaseId}`,
+              `to=${email ? "set" : "missing"}`,
+              `activationUrls=${activationUrls.length}`,
+            ].join(" ")
+          );
           return { status: "sent" };
         } catch (error) {
           processedPurchases.del(purchaseId);

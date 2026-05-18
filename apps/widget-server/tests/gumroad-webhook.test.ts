@@ -127,6 +127,7 @@ test("Gumroad webhook processor logs email errors without plaintext license valu
     bundleProductId: "bundle-product",
     publicWidgetBaseUrl: "https://widgets.atomicskills.academy",
     logger: {
+      debug: () => undefined,
       info: () => undefined,
       warn: () => undefined,
       error: (message: string) => errors.push(message),
@@ -147,4 +148,38 @@ test("Gumroad webhook processor logs email errors without plaintext license valu
   );
   assert.doesNotMatch(errors.join("\n"), /SECRET-LICENSE/);
   assert.match(errors.join("\n"), /license=/);
+});
+
+test("Gumroad webhook processor writes trace logs through debug without plaintext license values", async () => {
+  const logs: string[] = [];
+  const processor = createGumroadWebhookProcessor({
+    bundleProductId: "bundle-product",
+    publicWidgetBaseUrl: "https://widgets.atomicskills.academy",
+    logger: {
+      info: (message: string) => logs.push(message),
+      warn: (message: string) => logs.push(message),
+      error: (message: string) => logs.push(message),
+      debug: (message: string) => logs.push(message),
+    },
+    sendActivationEmail: async () => undefined,
+  });
+
+  assert.deepEqual(
+    await processor.process({
+      email: "buyer@example.com",
+      license_key: "SECRET-LICENSE",
+      product_id: "bundle-product",
+      sale_id: "sale-999",
+    }),
+    { status: "sent" }
+  );
+
+  const output = logs.join("\n");
+  assert.match(output, /\[gumroad-webhook\] received/);
+  assert.match(output, /\[gumroad-webhook\] accepted/);
+  assert.match(output, /\[gumroad-webhook\] email send started/);
+  assert.match(output, /\[gumroad-webhook\] email sent/);
+  assert.doesNotMatch(output, /SECRET-LICENSE/);
+  assert.doesNotMatch(output, /calendar\?license=/);
+  assert.match(output, /license=sha256:/);
 });

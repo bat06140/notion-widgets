@@ -1,5 +1,9 @@
 import { createRequire } from "node:module";
 import type { ActivationEmail, SendActivationEmail } from "./gumroad-webhook-service.js";
+import {
+  createDebugLogger,
+  type DebugLogger,
+} from "../logging/license-debug.js";
 
 const require = createRequire(import.meta.url);
 const nodemailer = require("nodemailer") as {
@@ -13,6 +17,7 @@ export type SmtpActivationEmailSenderOptions = {
   port?: number;
   fromEmail?: string;
   fromName?: string;
+  logger?: DebugLogger;
 };
 
 function formatFromAddress(fromEmail: string, fromName: string) {
@@ -24,7 +29,9 @@ export function createSmtpActivationEmailSender({
   port = Number(process.env.SMTP_RELAY_PORT ?? 587),
   fromEmail = process.env.SMTP_FROM_EMAIL ?? "",
   fromName = process.env.SMTP_FROM_NAME ?? "Atomic Skills",
+  logger,
 }: SmtpActivationEmailSenderOptions = {}): SendActivationEmail {
+  const debugLogger = createDebugLogger(logger);
   const transporter = nodemailer.createTransport({
     host,
     port,
@@ -37,8 +44,19 @@ export function createSmtpActivationEmailSender({
 
   return async function sendActivationEmail(email: ActivationEmail) {
     if (!fromEmail) {
+      debugLogger.error("[activation-email] SMTP_FROM_EMAIL missing");
       throw new Error("SMTP_FROM_EMAIL manquant");
     }
+
+    debugLogger.debug(
+      [
+        "[activation-email] smtp send",
+        `host=${host}`,
+        `port=${port}`,
+        `from=${fromEmail ? "set" : "missing"}`,
+        `to=${email.to ? "set" : "missing"}`,
+      ].join(" ")
+    );
 
     await transporter.sendMail({
       from: formatFromAddress(fromEmail, fromName),

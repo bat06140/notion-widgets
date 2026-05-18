@@ -24,6 +24,7 @@ test("logStartupDiagnostics reports env presence without leaking secrets", () =>
   try {
     logStartupDiagnostics({
       logger: {
+        debug: () => undefined,
         info: (message: string) => logs.push(message),
         warn: () => undefined,
         error: () => undefined,

@@ -1,13 +1,20 @@
 import crypto from "node:crypto";
 
-export type DebugLogger = Pick<Console, "info" | "warn" | "error">;
+export type DebugLogger = Pick<Console, "debug" | "info" | "warn" | "error">;
 
 export function isLicenseDebugEnabled(debugLicenses = process.env.DEBUG_LICENSES) {
   return debugLicenses === "1" || debugLicenses === "true";
 }
 
 export function createDebugLogger(logger?: DebugLogger): DebugLogger {
-  return logger ?? console;
+  return (
+    logger ?? {
+      debug: () => undefined,
+      info: console.info.bind(console),
+      warn: console.warn.bind(console),
+      error: console.error.bind(console),
+    }
+  );
 }
 
 export function fingerprintLicense(license: string | undefined) {

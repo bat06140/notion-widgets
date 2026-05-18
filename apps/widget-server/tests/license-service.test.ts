@@ -98,6 +98,7 @@ test("checkAccess caches results and uses them on subsequent calls", async () =>
     now: () => new Date("2026-04-21T10:00:00Z"),
     debugLicenses: true,
     logger: {
+      debug: () => undefined,
       info: (message: string) => logs.push(`info:${message}`),
       warn: (message: string) => logs.push(`warn:${message}`),
       error: (message: string) => logs.push(`error:${message}`),
@@ -122,6 +123,7 @@ test("checkAccess returns service unavailable when verify fails", async () => {
     now: () => new Date("2026-04-21T10:00:00Z"),
     debugLicenses: true,
     logger: {
+      debug: () => undefined,
       info: (message: string) => logs.push(`info:${message}`),
       warn: (message: string) => logs.push(`warn:${message}`),
       error: (message: string) => logs.push(`error:${message}`),
