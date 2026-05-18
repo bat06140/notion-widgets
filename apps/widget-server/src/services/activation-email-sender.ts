@@ -1,5 +1,8 @@
 import { createRequire } from "node:module";
-import type { ActivationEmail, SendActivationEmail } from "./gumroad-webhook-service.js";
+import type {
+  ActivationEmail,
+  SendActivationEmail,
+} from "./gumroad-webhook-service.js";
 import {
   createDebugLogger,
   type DebugLogger,
@@ -21,7 +24,9 @@ export type SmtpActivationEmailSenderOptions = {
 };
 
 function formatFromAddress(fromEmail: string, fromName: string) {
-  return fromName ? `"${fromName.replaceAll('"', '\\"')}" <${fromEmail}>` : fromEmail;
+  return fromName
+    ? `"${fromName.replaceAll('"', '\\"')}" <${fromEmail}>`
+    : fromEmail;
 }
 
 export function createSmtpActivationEmailSender({
@@ -40,6 +45,7 @@ export function createSmtpActivationEmailSender({
     tls: {
       minVersion: "TLSv1.2",
     },
+    name: "atomicskills.academy",
   });
 
   return async function sendActivationEmail(email: ActivationEmail) {
@@ -55,7 +61,7 @@ export function createSmtpActivationEmailSender({
         `port=${port}`,
         `from=${fromEmail ? "set" : "missing"}`,
         `to=${email.to ? "set" : "missing"}`,
-      ].join(" ")
+      ].join(" "),
     );
 
     await transporter.sendMail({
