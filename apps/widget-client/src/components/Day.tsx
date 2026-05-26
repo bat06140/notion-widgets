@@ -8,6 +8,7 @@ export const Day = ({
   isWeekdayHeader = false,
   isToday = false,
   isOtherMonth = false,
+  className,
   onClick,
   theme,
   children,
@@ -15,6 +16,7 @@ export const Day = ({
   isWeekdayHeader?: boolean;
   isToday?: boolean;
   isOtherMonth?: boolean;
+  className?: string;
   hoverEnabled?: boolean;
   date?: Date;
   onClick?: React.MouseEventHandler<HTMLElement>;
@@ -54,6 +56,7 @@ export const Day = ({
       <AutosizeText
         wrapperTw={clsx(
           "h-full w-full rounded-[8px]",
+          className,
           "border border-[var(--day-border)] bg-[var(--day-bg)] text-[var(--day-text)] transition-colors",
           resolvedAppearance.borderStyle === "none" && "border-transparent",
           resolvedAppearance.borderStyle === "solid" && "border-solid",

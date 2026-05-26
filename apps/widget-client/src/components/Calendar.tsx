@@ -145,64 +145,93 @@ const Calendar = ({
       <div
         ref={gridRef}
         css={css`
-          grid-template-rows: repeat(7, minmax(0, 1fr));
+          grid-template-rows: minmax(0, 1fr) minmax(0, 6fr);
         `}
         className={cn(
-          "grid w-full min-h-0 grid-cols-7 gap-[2px] rounded-[8px]   box-border",
+          "grid w-full min-h-0 gap-y-0 rounded-[8px] box-border",
           shouldRenderBranding ? "flex-[1_1_0]" : "flex-1"
         )}
         style={{
-          borderColor: withOpacity(effectiveTheme.color1, 0.12),
           color: effectiveTheme.color1,
         }}
       >
-        {daysOfWeek.map((day, index) => (
-          <Day key={index} theme={effectiveTheme} isWeekdayHeader={true}>
-            {day}
-          </Day>
-        ))}
-        {daysFromPreviousMonth.map((day, index) => (
-          <Day
-            key={index}
-            theme={effectiveTheme}
-            isOtherMonth={true}
-            onClick={(e: React.MouseEvent) => {
-              onDateSelected?.(e, new Date(currentYear, currentMonth - 1, day));
-            }}
-          >
-            {day.toString()}
-          </Day>
-        ))}
-        {daysFromCurrentMonth.map((day, index) => {
-          const isToday =
-            day === new Date().getDate() &&
-            currentMonth === new Date().getMonth() &&
-            currentYear === new Date().getFullYear();
-          return (
+        <div className="grid min-h-0 w-full grid-cols-7 gap-[2px]">
+          {daysOfWeek.map((day, index) => (
             <Day
-              key={index}
+              key={day}
               theme={effectiveTheme}
-              isToday={isToday}
+              isWeekdayHeader={true}
+              className={cn(
+                index === 0 && "rounded-bl-none",
+                index === daysOfWeek.length - 1 && "rounded-br-none"
+              )}
+            >
+              {day}
+            </Day>
+          ))}
+        </div>
+        <div
+          data-calendar-number-grid="true"
+          css={css`
+            grid-template-rows: repeat(6, minmax(0, 1fr));
+          `}
+          className="grid min-h-0 grid-cols-7 gap-[2px] rounded-[8px] rounded-t-none border border-t-0 box-border"
+          style={{
+            borderColor: withOpacity(effectiveTheme.color1, 0.25),
+          }}
+        >
+          {daysFromPreviousMonth.map((day, index) => (
+            <Day
+              key={`previous-${index}`}
+              theme={effectiveTheme}
+              isOtherMonth={true}
               onClick={(e: React.MouseEvent) => {
-                onDateSelected?.(e, new Date(currentYear, currentMonth, day));
+                onDateSelected?.(
+                  e,
+                  new Date(currentYear, currentMonth - 1, day)
+                );
               }}
             >
               {day.toString()}
             </Day>
-          );
-        })}
-        {daysFromNextMonth.map((day, index) => (
-          <Day
-            key={index}
-            theme={effectiveTheme}
-            isOtherMonth={true}
-            onClick={(e: React.MouseEvent) => {
-              onDateSelected?.(e, new Date(currentYear, currentMonth + 1, day));
-            }}
-          >
-            {day.toString()}
-          </Day>
-        ))}
+          ))}
+          {daysFromCurrentMonth.map((day, index) => {
+            const isToday =
+              day === new Date().getDate() &&
+              currentMonth === new Date().getMonth() &&
+              currentYear === new Date().getFullYear();
+            return (
+              <Day
+                key={`current-${index}`}
+                theme={effectiveTheme}
+                isToday={isToday}
+                onClick={(e: React.MouseEvent) => {
+                  onDateSelected?.(
+                    e,
+                    new Date(currentYear, currentMonth, day)
+                  );
+                }}
+              >
+                {day.toString()}
+              </Day>
+            );
+          })}
+          {daysFromNextMonth.map((day, index) => (
+            <Day
+              key={`next-${index}`}
+              theme={effectiveTheme}
+              isOtherMonth={true}
+              onClick={(e: React.MouseEvent) => {
+                onDateSelected?.(
+                  e,
+                  new Date(currentYear, currentMonth + 1, day)
+                );
+              }}
+            >
+              {day.toString()}
+            </Day>
+          ))}
+        </div>
       </div>
       {shouldRenderBranding && <WidgetFooter theme={effectiveTheme} />}
     </SquareContainer>

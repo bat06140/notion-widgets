@@ -64,6 +64,18 @@ test("WidgetThemeEditor freemium step 1 renders locked premium layout and color 
   );
 
   assert.match(markup, /href="https:\/\/example\.com\/purchase"/);
+  assert.match(markup, /data-theme-editor-close="true"/);
+  assert.match(markup, /aria-label="Close popover"/);
+  assert.match(markup, /left-0 top-0/);
+  assert.match(markup, /translate-x-\[-50%\] -translate-y-1\/2/);
+  assert.match(markup, /h-6 w-6/);
+  assert.match(markup, /border-red-200/);
+  assert.match(markup, /text-red-500/);
+  assert.match(markup, /lucide-x/);
+  assert.match(markup, /p-\[6px\]/);
+  assert.match(markup, /gap-\[6px\]/);
+  assert.match(markup, /ring-black\/10/);
+  assert.match(markup, /shadow-\[0_24px_70px_rgba\(0,0,0,0\.32\),0_6px_18px_rgba\(0,0,0,0\.16\)\]/);
   assert.match(markup, /data-layout-control="locked"/);
   assert.match(markup, /data-theme-editor-card="locked"/);
   assert.match(markup, /data-theme-editor-swatch-lock="true"/);
@@ -83,6 +95,8 @@ test("WidgetThemeEditor premium settings show an editable layout control", () =>
   );
 
   assert.match(markup, /data-layout-control="editable"/);
+  assert.match(markup, /data-layout-lock-slot="reserved"/);
+  assert.match(markup, /invisible/);
   assert.match(markup, />Square</);
   assert.match(markup, />Full</);
   assert.match(markup, /aria-pressed="true">Full/);
@@ -112,7 +126,6 @@ test("WidgetThemeEditor open state no longer renders modal header or cancel butt
   );
 
   assert.doesNotMatch(markup, /<h2/);
-  assert.doesNotMatch(markup, /aria-label="Close color theme editor"/);
   assert.doesNotMatch(markup, />Cancel</);
 });
 
@@ -129,6 +142,7 @@ test("WidgetThemeEditor detail step renders a confirm button for color changes",
   assert.match(markup, /data-theme-editor-confirm-color="true"/);
   assert.match(markup, /aria-label="Apply"/);
   assert.match(markup, /text-green-600/);
+  assert.doesNotMatch(markup, /data-theme-editor-close="true"/);
   assert.doesNotMatch(markup, />Apply</);
 });
 
@@ -164,7 +178,7 @@ test("WidgetThemeEditor open state renders a widget-scoped overlay and anchored 
   assert.match(markup, /data-theme-editor-panel="true"/);
   assert.match(markup, /bottom-1/);
   assert.match(markup, /right-1/);
-  assert.match(markup, /h-\[258px\] w-\[190px\]/);
+  assert.match(markup, /h-\[254px\] w-\[190px\]/);
   assert.match(markup, /max-width:calc\(100% - 8px\)/);
   assert.match(markup, /max-height:calc\(100% - 8px\)/);
 });
@@ -240,4 +254,35 @@ test("Calendar threads access granted into the premium editor path", () => {
 
   assert.doesNotMatch(markup, /href="https:\/\/atomicskills\.academy\/widgets-notion\/"/);
   assert.match(markup, /Open widget settings/);
+});
+
+test("Calendar wraps numbered days in a color1 quarter-opacity outline", () => {
+  const markup = renderWithTheme(
+    React.createElement(Calendar, {
+      layout: "square",
+      accessGranted: true,
+      allowThemeEditor: false,
+      purchaseUrl: DEFAULT_WIDGET_PURCHASE_URL,
+    })
+  );
+
+  assert.match(markup, /data-calendar-number-grid="true"/);
+  assert.match(markup, /gap-y-0/);
+  assert.match(markup, /border-color:rgba\(55, 53, 47, 0.25\)/);
+  assert.match(markup, /border-t-0/);
+  assert.match(markup, /rounded-t-none/);
+});
+
+test("Calendar removes bottom corner rounding from weekday edge cells", () => {
+  const markup = renderWithTheme(
+    React.createElement(Calendar, {
+      layout: "square",
+      accessGranted: true,
+      allowThemeEditor: false,
+      purchaseUrl: DEFAULT_WIDGET_PURCHASE_URL,
+    })
+  );
+
+  assert.match(markup, /rounded-bl-none/);
+  assert.match(markup, /rounded-br-none/);
 });

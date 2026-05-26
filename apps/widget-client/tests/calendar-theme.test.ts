@@ -42,5 +42,5 @@ test("other-month day cells keep the same theme color with reduced opacity", () 
     isOtherMonth: true,
   });
 
-  assert.match(appearance.textColor, /^rgba\(209, 45, 45, 0\./);
+  assert.equal(appearance.textColor, "rgba(209, 45, 45, 0.25)");
 });

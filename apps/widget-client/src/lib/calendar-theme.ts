@@ -55,7 +55,7 @@ export const getCalendarDayAppearance = (
   }
 
   return {
-    textColor: isOtherMonth ? withOpacity(theme.color1, 0.18) : theme.color1,
+    textColor: isOtherMonth ? withOpacity(theme.color1, 0.25) : theme.color1,
     backgroundColor: "transparent",
     borderColor: "transparent",
     borderStyle: "solid",
