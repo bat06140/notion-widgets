@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  getWidgetDocumentTitle,
   getWidgetLayoutStorageKey,
   readWidgetLayoutFromStorage,
   resolveAppView,
@@ -163,4 +164,10 @@ test("writeWidgetLayoutToStorage ignores unavailable localStorage", () => {
   assert.doesNotThrow(() =>
     writeWidgetLayoutToStorage(storage, "clock", "square")
   );
+});
+
+test("getWidgetDocumentTitle maps widgets to browser tab titles", () => {
+  assert.equal(getWidgetDocumentTitle("calendar"), "Widget Calendar");
+  assert.equal(getWidgetDocumentTitle("deadline"), "Widget Deadline");
+  assert.equal(getWidgetDocumentTitle("clock"), "Widget Clock");
 });

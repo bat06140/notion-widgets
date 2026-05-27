@@ -24,6 +24,12 @@ const PATH_WIDGETS: Readonly<Record<string, WidgetKey>> = {
   "/deadline": "deadline",
 };
 
+const WIDGET_DOCUMENT_TITLES: Readonly<Record<WidgetKey, string>> = {
+  calendar: "Widget Calendar",
+  deadline: "Widget Deadline",
+  clock: "Widget Clock",
+};
+
 function isWidgetKey(value: string | null | undefined): value is WidgetKey {
   return (
     value === "calendar" || value === "deadline" || value === "clock"
@@ -71,6 +77,10 @@ export function resolveAppView(
     widget,
     layout: DEFAULT_WIDGET_LAYOUT,
   };
+}
+
+export function getWidgetDocumentTitle(widget: WidgetKey): string {
+  return WIDGET_DOCUMENT_TITLES[widget];
 }
 
 export function readWidgetLayoutFromStorage(

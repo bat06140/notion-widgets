@@ -6,6 +6,7 @@ import {
   formatDeadlineLabel,
   getDeadlineFontScale,
 } from "../lib/deadline.js";
+import { getBrowserLocale } from "../lib/locale.js";
 import { DEFAULT_WIDGET_PURCHASE_URL } from "../lib/widget-access.js";
 
 export const Deadline = ({
@@ -78,7 +79,7 @@ export const Deadline = ({
     }
   }, []);
 
-  const label = formatDeadlineLabel(daysUntilDeadline);
+  const label = formatDeadlineLabel(daysUntilDeadline, getBrowserLocale());
 
   return (
     <CenteredPopover

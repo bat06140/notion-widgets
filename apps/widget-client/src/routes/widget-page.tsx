@@ -11,6 +11,7 @@ import {
 import { getWidgetFromPathname } from "../lib/widget-route.js";
 import {
   DEFAULT_WIDGET_LAYOUT,
+  getWidgetDocumentTitle,
   readWidgetLayoutFromStorage,
   resolveAppView,
   type WidgetLayout,
@@ -23,6 +24,16 @@ export function WidgetPage() {
   const widget = getWidgetFromPathname(location.pathname);
   const [access, setAccess] = useState<WidgetAccessState | null>(null);
   const [layout, setLayout] = useState<WidgetLayout>("full");
+  const documentTitle =
+    view.kind === "widget"
+      ? getWidgetDocumentTitle(view.widget)
+      : "Widget Calendar";
+
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.title = documentTitle;
+    }
+  }, [documentTitle]);
 
   useEffect(() => {
     let cancelled = false;

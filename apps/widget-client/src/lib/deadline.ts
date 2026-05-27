@@ -1,9 +1,19 @@
-export const formatDeadlineLabel = (daysUntilDeadline: number | undefined) => {
+import type { AppLocale } from "./locale.js";
+
+const getDeadlinePrefix = (locale: AppLocale) =>
+  locale === "fr" ? "J-" : "D-";
+
+export const formatDeadlineLabel = (
+  daysUntilDeadline: number | undefined,
+  locale: AppLocale = "fr"
+) => {
+  const prefix = getDeadlinePrefix(locale);
+
   if (daysUntilDeadline == null || daysUntilDeadline < 0) {
-    return "J-?";
+    return `${prefix}?`;
   }
 
-  return `J-${daysUntilDeadline}`;
+  return `${prefix}${daysUntilDeadline}`;
 };
 
 export const getDeadlineFontScale = (label: string) => {

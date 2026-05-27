@@ -54,7 +54,7 @@ test("clock month labels use localized short month names without trailing punctu
   assert.equal(formatClockMonthLabel(sampleDate, "en"), "APR");
 });
 
-test("translation set localizes visible copy and keeps the J- widget label in both locales", () => {
+test("translation set localizes visible copy and uses locale-specific deadline labels", () => {
   const french = getTranslationSet("fr");
   const english = getTranslationSet("en");
 
@@ -62,7 +62,7 @@ test("translation set localizes visible copy and keeps the J- widget label in bo
   assert.equal(french.widgetOptions.deadline, "J-");
   assert.equal(french.widgetOptions.clock, "Horloge");
   assert.equal(english.widgetOptions.calendar, "Calendar");
-  assert.equal(english.widgetOptions.deadline, "J-");
+  assert.equal(english.widgetOptions.deadline, "D-");
   assert.equal(english.widgetOptions.clock, "Clock");
   assert.equal(french.themeEditor.title, "Choisir une couleur");
   assert.equal(english.themeEditor.title, "Choose a color");
