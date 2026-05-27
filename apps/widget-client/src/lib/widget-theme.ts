@@ -1,3 +1,5 @@
+import type { WidgetKey } from "@repo/shared";
+
 export interface WidgetTheme {
   color1: string;
   color2: string;
@@ -13,6 +15,8 @@ export interface RgbaColorValue {
 export type ThemeInputMode = "hex" | "rgba";
 
 export const WIDGET_THEME_STORAGE_KEY = "widgetTheme";
+export const getWidgetThemeStorageKey = (widget: WidgetKey): string =>
+  `${WIDGET_THEME_STORAGE_KEY}:${widget}`;
 
 export const DEFAULT_WIDGET_THEME: WidgetTheme = {
   color1: "#37352F",
@@ -145,11 +149,12 @@ export const parseWidgetThemeStorageValue = (
 };
 
 export const readWidgetThemeFromStorage = (
-  storage: Pick<Storage, "getItem">
+  storage: Pick<Storage, "getItem">,
+  widget: WidgetKey
 ): WidgetTheme => {
   try {
     return parseWidgetThemeStorageValue(
-      storage.getItem(WIDGET_THEME_STORAGE_KEY) ?? undefined
+      storage.getItem(getWidgetThemeStorageKey(widget)) ?? undefined
     );
   } catch {
     return DEFAULT_WIDGET_THEME;
@@ -158,11 +163,12 @@ export const readWidgetThemeFromStorage = (
 
 export const writeWidgetThemeToStorage = (
   storage: Pick<Storage, "setItem">,
+  widget: WidgetKey,
   theme: WidgetTheme
 ): void => {
   try {
     storage.setItem(
-      WIDGET_THEME_STORAGE_KEY,
+      getWidgetThemeStorageKey(widget),
       serializeWidgetThemeStorageValue(theme)
     );
   } catch {

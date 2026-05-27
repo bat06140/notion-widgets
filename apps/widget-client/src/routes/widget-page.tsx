@@ -10,10 +10,11 @@ import {
 } from "../lib/widget-access-api.js";
 import { getWidgetFromPathname } from "../lib/widget-route.js";
 import {
-  buildWidgetLayoutCookie,
+  DEFAULT_WIDGET_LAYOUT,
+  readWidgetLayoutFromStorage,
   resolveAppView,
-  resolveWidgetLayoutFromCookie,
   type WidgetLayout,
+  writeWidgetLayoutToStorage,
 } from "../lib/view-config.js";
 
 export function WidgetPage() {
@@ -45,11 +46,12 @@ export function WidgetPage() {
         setAccess(nextAccess);
         setLayout(
           typeof document === "undefined"
-            ? resolveWidgetLayoutFromCookie("", nextAccess.accessGranted)
-            : resolveWidgetLayoutFromCookie(
-                document.cookie,
-                nextAccess.accessGranted,
-              ),
+            ? DEFAULT_WIDGET_LAYOUT
+            : readWidgetLayoutFromStorage(
+                window.localStorage,
+                widget,
+                nextAccess.accessGranted
+              )
         );
       }
     });
@@ -73,33 +75,35 @@ export function WidgetPage() {
     }
 
     setLayout(nextLayout);
-    document.cookie = buildWidgetLayoutCookie(nextLayout);
+    if (view.kind === "widget") {
+      writeWidgetLayoutToStorage(window.localStorage, view.widget, nextLayout);
+    }
   };
 
   return (
-    <WidgetThemeProvider>
-      <div
-        className={
-          view.kind === "widget" && layout === "square"
-            ? "flex h-screen w-screen items-center justify-center p-4"
-            : "h-screen w-screen"
-        }
-      >
-        {view.kind === "showcase" ? (
-          <WidgetShowcase
-            accessGranted={access.accessGranted}
-            purchaseUrl={access.purchaseUrl}
-          />
-        ) : (
-          renderWidget({
+    <div
+      className={
+        view.kind === "widget" && layout === "square"
+          ? "flex h-screen w-screen items-center justify-center p-4"
+          : "h-screen w-screen"
+      }
+    >
+      {view.kind === "showcase" ? (
+        <WidgetShowcase
+          accessGranted={access.accessGranted}
+          purchaseUrl={access.purchaseUrl}
+        />
+      ) : (
+        <WidgetThemeProvider widget={view.widget}>
+          {renderWidget({
             widget: view.widget,
             layout,
             accessGranted: access.accessGranted,
             purchaseUrl: access.purchaseUrl,
             onLayoutChange: updateLayout,
-          })
-        )}
-      </div>
-    </WidgetThemeProvider>
+          })}
+        </WidgetThemeProvider>
+      )}
+    </div>
   );
 }

@@ -1,4 +1,5 @@
 import { createContext, useEffect, useMemo, useState } from "react";
+import type { WidgetKey } from "@repo/shared";
 import {
   DEFAULT_WIDGET_THEME,
   readWidgetThemeFromStorage,
@@ -16,24 +17,26 @@ export const WidgetThemeContext =
 
 export const WidgetThemeProvider = ({
   children,
+  widget,
 }: {
   children: React.ReactNode;
+  widget: WidgetKey;
 }) => {
   const [theme, setTheme] = useState<WidgetTheme>(DEFAULT_WIDGET_THEME);
 
   useEffect(() => {
-    setTheme(readWidgetThemeFromStorage(window.localStorage));
-  }, []);
+    setTheme(readWidgetThemeFromStorage(window.localStorage, widget));
+  }, [widget]);
 
   const value = useMemo<WidgetThemeContextValue>(
     () => ({
       theme,
       saveTheme: (nextTheme) => {
         setTheme(nextTheme);
-        writeWidgetThemeToStorage(window.localStorage, nextTheme);
+        writeWidgetThemeToStorage(window.localStorage, widget, nextTheme);
       },
     }),
-    [theme]
+    [theme, widget]
   );
 
   return (

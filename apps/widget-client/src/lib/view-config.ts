@@ -2,7 +2,9 @@ import type { WidgetKey } from "@repo/shared";
 
 export type { WidgetKey } from "@repo/shared";
 export type WidgetLayout = "square" | "full";
-export const WIDGET_LAYOUT_COOKIE_NAME = "widgetLayout";
+export const WIDGET_LAYOUT_STORAGE_KEY = "widgetLayout";
+export const getWidgetLayoutStorageKey = (widget: WidgetKey): string =>
+  `${WIDGET_LAYOUT_STORAGE_KEY}:${widget}`;
 export const DEFAULT_WIDGET_LAYOUT: WidgetLayout = "full";
 
 export type AppView =
@@ -71,26 +73,32 @@ export function resolveAppView(
   };
 }
 
-export function resolveWidgetLayoutFromCookie(
-  cookieString: string,
+export function readWidgetLayoutFromStorage(
+  storage: Pick<Storage, "getItem">,
+  widget: WidgetKey,
   accessGranted: boolean
 ): WidgetLayout {
   if (!accessGranted) {
     return "full";
   }
 
-  const layout = cookieString
-    .split(";")
-    .map((part) => part.trim())
-    .find((part) => part.startsWith(`${WIDGET_LAYOUT_COOKIE_NAME}=`))
-    ?.slice(WIDGET_LAYOUT_COOKIE_NAME.length + 1);
+  try {
+    const layout = storage.getItem(getWidgetLayoutStorageKey(widget));
 
-  return isWidgetLayout(layout) ? layout : DEFAULT_WIDGET_LAYOUT;
+    return isWidgetLayout(layout) ? layout : DEFAULT_WIDGET_LAYOUT;
+  } catch {
+    return DEFAULT_WIDGET_LAYOUT;
+  }
 }
 
-export function buildWidgetLayoutCookie(
-  layout: WidgetLayout,
-  maxAgeSeconds = 60 * 60 * 24 * 365
-): string {
-  return `${WIDGET_LAYOUT_COOKIE_NAME}=${layout}; Path=/; Max-Age=${maxAgeSeconds}; SameSite=Lax`;
+export function writeWidgetLayoutToStorage(
+  storage: Pick<Storage, "setItem">,
+  widget: WidgetKey,
+  layout: WidgetLayout
+): void {
+  try {
+    storage.setItem(getWidgetLayoutStorageKey(widget), layout);
+  } catch {
+    return;
+  }
 }

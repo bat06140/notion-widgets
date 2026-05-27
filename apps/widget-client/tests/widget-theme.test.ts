@@ -11,7 +11,7 @@ import {
   readWidgetThemeFromStorage,
   rgbaToHex,
   serializeWidgetThemeStorageValue,
-  WIDGET_THEME_STORAGE_KEY,
+  getWidgetThemeStorageKey,
   writeWidgetThemeToStorage,
   withOpacity,
 } from "../src/lib/widget-theme.js";
@@ -64,30 +64,44 @@ test("parseWidgetThemeStorageValue falls back to default for invalid colors", ()
   assert.deepEqual(parsed, DEFAULT_WIDGET_THEME);
 });
 
-test("readWidgetThemeFromStorage reads widgetTheme from localStorage", () => {
+test("readWidgetThemeFromStorage reads widgetTheme from widget-specific localStorage", () => {
   const storage = createStorage({
-    [WIDGET_THEME_STORAGE_KEY]: serializeWidgetThemeStorageValue({
+    [getWidgetThemeStorageKey("calendar")]: serializeWidgetThemeStorageValue({
       color1: "#123456",
       color2: "#abcdef",
     }),
   });
 
-  assert.deepEqual(readWidgetThemeFromStorage(storage), {
+  assert.deepEqual(readWidgetThemeFromStorage(storage, "calendar"), {
     color1: "#123456",
     color2: "#abcdef",
   });
 });
 
-test("writeWidgetThemeToStorage writes widgetTheme to localStorage", () => {
+test("readWidgetThemeFromStorage does not share themes across widgets", () => {
+  const storage = createStorage({
+    [getWidgetThemeStorageKey("calendar")]: serializeWidgetThemeStorageValue({
+      color1: "#123456",
+      color2: "#abcdef",
+    }),
+  });
+
+  assert.deepEqual(
+    readWidgetThemeFromStorage(storage, "clock"),
+    DEFAULT_WIDGET_THEME
+  );
+});
+
+test("writeWidgetThemeToStorage writes widgetTheme to widget-specific localStorage", () => {
   const storage = createStorage();
 
-  writeWidgetThemeToStorage(storage, {
+  writeWidgetThemeToStorage(storage, "deadline", {
     color1: "#123456",
     color2: "#abcdef",
   });
 
   assert.equal(
-    storage.getItem(WIDGET_THEME_STORAGE_KEY),
+    storage.getItem(getWidgetThemeStorageKey("deadline")),
     serializeWidgetThemeStorageValue({
       color1: "#123456",
       color2: "#abcdef",
@@ -103,7 +117,7 @@ test("writeWidgetThemeToStorage ignores unavailable localStorage", () => {
   };
 
   assert.doesNotThrow(() =>
-    writeWidgetThemeToStorage(storage, {
+    writeWidgetThemeToStorage(storage, "clock", {
       color1: "#123456",
       color2: "#abcdef",
     })

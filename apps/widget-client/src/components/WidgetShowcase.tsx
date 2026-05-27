@@ -7,6 +7,7 @@ import {
 } from "../lib/showcase-layout.js";
 import { DEFAULT_WIDGET_PURCHASE_URL } from "../lib/widget-access.js";
 import { getBrowserLocale, getTranslationSet } from "../lib/locale.js";
+import { WidgetThemeProvider } from "../context/WidgetThemeContext.js";
 import { getWidgetOptions, renderWidget } from "./widget-registry.js";
 
 type ShowcasePanelKey = "primary" | "secondary" | "tertiary";
@@ -51,7 +52,9 @@ const ShowcasePanel = ({
         </select>
       </div>
       <div className="h-full w-full min-h-0 flex-1 p-2 pt-[2px] md:p-3 md:pt-[2px]">
-        {renderWidget({ widget, layout: "full", accessGranted, purchaseUrl })}
+        <WidgetThemeProvider widget={widget}>
+          {renderWidget({ widget, layout: "full", accessGranted, purchaseUrl })}
+        </WidgetThemeProvider>
       </div>
     </section>
   );

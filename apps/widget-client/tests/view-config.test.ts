@@ -1,10 +1,26 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  buildWidgetLayoutCookie,
+  getWidgetLayoutStorageKey,
+  readWidgetLayoutFromStorage,
   resolveAppView,
-  resolveWidgetLayoutFromCookie,
+  writeWidgetLayoutToStorage,
 } from "../src/lib/view-config.js";
+
+const createStorage = (initialValues: Record<string, string> = {}): Storage => {
+  const values = new Map(Object.entries(initialValues));
+
+  return {
+    get length() {
+      return values.size;
+    },
+    clear: () => values.clear(),
+    getItem: (key) => values.get(key) ?? null,
+    key: (index) => Array.from(values.keys())[index] ?? null,
+    removeItem: (key) => values.delete(key),
+    setItem: (key, value) => values.set(key, value),
+  };
+};
 
 test("resolveAppView uses the selected widget with full layout by default", () => {
   assert.deepEqual(resolveAppView("?widget=clock"), {
@@ -84,27 +100,67 @@ test("resolveAppView ignores the license query param for access", () => {
   });
 });
 
-test("resolveWidgetLayoutFromCookie uses the persisted layout for premium users", () => {
+test("readWidgetLayoutFromStorage uses the persisted widget-specific layout for premium users", () => {
+  const storage = createStorage({
+    [getWidgetLayoutStorageKey("calendar")]: "square",
+  });
+
   assert.equal(
-    resolveWidgetLayoutFromCookie("widgetLayout=full", true),
+    readWidgetLayoutFromStorage(storage, "calendar", true),
+    "square"
+  );
+});
+
+test("readWidgetLayoutFromStorage defaults premium users to full layout", () => {
+  assert.equal(readWidgetLayoutFromStorage(createStorage(), "calendar", true), "full");
+});
+
+test("readWidgetLayoutFromStorage defaults freemium users to full layout", () => {
+  assert.equal(
+    readWidgetLayoutFromStorage(
+      createStorage({ [getWidgetLayoutStorageKey("calendar")]: "square" }),
+      "calendar",
+      false
+    ),
     "full"
   );
 });
 
-test("resolveWidgetLayoutFromCookie defaults premium users to full layout", () => {
-  assert.equal(resolveWidgetLayoutFromCookie("", true), "full");
+test("readWidgetLayoutFromStorage does not share layouts across widgets", () => {
+  const storage = createStorage({
+    [getWidgetLayoutStorageKey("calendar")]: "square",
+  });
+
+  assert.equal(readWidgetLayoutFromStorage(storage, "clock", true), "full");
 });
 
-test("resolveWidgetLayoutFromCookie defaults freemium users to full layout", () => {
+test("readWidgetLayoutFromStorage defaults to full for invalid persisted layouts", () => {
   assert.equal(
-    resolveWidgetLayoutFromCookie("widgetLayout=square", false),
+    readWidgetLayoutFromStorage(
+      createStorage({ [getWidgetLayoutStorageKey("calendar")]: "wide" }),
+      "calendar",
+      true
+    ),
     "full"
   );
 });
 
-test("buildWidgetLayoutCookie serializes the selected layout", () => {
-  assert.match(
-    buildWidgetLayoutCookie("full"),
-    /^widgetLayout=full; Path=\/; Max-Age=31536000; SameSite=Lax$/
+test("writeWidgetLayoutToStorage writes widgetLayout to localStorage", () => {
+  const storage = createStorage();
+
+  writeWidgetLayoutToStorage(storage, "deadline", "square");
+
+  assert.equal(storage.getItem(getWidgetLayoutStorageKey("deadline")), "square");
+});
+
+test("writeWidgetLayoutToStorage ignores unavailable localStorage", () => {
+  const storage: Pick<Storage, "setItem"> = {
+    setItem: () => {
+      throw new Error("Storage unavailable");
+    },
+  };
+
+  assert.doesNotThrow(() =>
+    writeWidgetLayoutToStorage(storage, "clock", "square")
   );
 });
