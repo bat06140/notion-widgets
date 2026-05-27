@@ -12,7 +12,7 @@ export interface RgbaColorValue {
 
 export type ThemeInputMode = "hex" | "rgba";
 
-export const WIDGET_THEME_COOKIE_NAME = "widgetTheme";
+export const WIDGET_THEME_STORAGE_KEY = "widgetTheme";
 
 export const DEFAULT_WIDGET_THEME: WidgetTheme = {
   color1: "#37352F",
@@ -112,11 +112,11 @@ const isThemeColor = (value: string): boolean => {
   return parseWidgetThemeColor(value) != null;
 };
 
-export const serializeWidgetThemeCookie = (theme: WidgetTheme): string => {
+export const serializeWidgetThemeStorageValue = (theme: WidgetTheme): string => {
   return encodeURIComponent(JSON.stringify(theme));
 };
 
-export const parseWidgetThemeCookie = (
+export const parseWidgetThemeStorageValue = (
   value: string | undefined
 ): WidgetTheme => {
   if (!value) {
@@ -142,6 +142,32 @@ export const parseWidgetThemeCookie = (
   }
 
   return DEFAULT_WIDGET_THEME;
+};
+
+export const readWidgetThemeFromStorage = (
+  storage: Pick<Storage, "getItem">
+): WidgetTheme => {
+  try {
+    return parseWidgetThemeStorageValue(
+      storage.getItem(WIDGET_THEME_STORAGE_KEY) ?? undefined
+    );
+  } catch {
+    return DEFAULT_WIDGET_THEME;
+  }
+};
+
+export const writeWidgetThemeToStorage = (
+  storage: Pick<Storage, "setItem">,
+  theme: WidgetTheme
+): void => {
+  try {
+    storage.setItem(
+      WIDGET_THEME_STORAGE_KEY,
+      serializeWidgetThemeStorageValue(theme)
+    );
+  } catch {
+    return;
+  }
 };
 
 const hexToRgb = (hex: string) => {
@@ -178,25 +204,4 @@ export const getContrastTextColor = (color: string): string => {
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
 
   return luminance > 0.65 ? "#111111" : "#FFFFFF";
-};
-
-export const readWidgetThemeFromCookieString = (
-  cookieString: string
-): WidgetTheme => {
-  const cookieValue = cookieString
-    .split(";")
-    .map((part) => part.trim())
-    .find((part) => part.startsWith(`${WIDGET_THEME_COOKIE_NAME}=`))
-    ?.slice(WIDGET_THEME_COOKIE_NAME.length + 1);
-
-  return parseWidgetThemeCookie(cookieValue);
-};
-
-export const buildWidgetThemeCookie = (
-  theme: WidgetTheme,
-  maxAgeSeconds = 60 * 60 * 24 * 365
-): string => {
-  return `${WIDGET_THEME_COOKIE_NAME}=${serializeWidgetThemeCookie(
-    theme
-  )}; Path=/; Max-Age=${maxAgeSeconds}; SameSite=Lax`;
 };

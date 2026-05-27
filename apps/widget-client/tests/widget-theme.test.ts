@@ -6,15 +6,33 @@ import {
   formatRgbaString,
   getContrastTextColor,
   normalizeThemeStorageColor,
-  parseWidgetThemeCookie,
+  parseWidgetThemeStorageValue,
   parseWidgetThemeColor,
+  readWidgetThemeFromStorage,
   rgbaToHex,
-  serializeWidgetThemeCookie,
+  serializeWidgetThemeStorageValue,
+  WIDGET_THEME_STORAGE_KEY,
+  writeWidgetThemeToStorage,
   withOpacity,
 } from "../src/lib/widget-theme.js";
 
-test("serializeWidgetThemeCookie stores the two colors as encoded json", () => {
-  const serialized = serializeWidgetThemeCookie({
+const createStorage = (initialValues: Record<string, string> = {}): Storage => {
+  const values = new Map(Object.entries(initialValues));
+
+  return {
+    get length() {
+      return values.size;
+    },
+    clear: () => values.clear(),
+    getItem: (key) => values.get(key) ?? null,
+    key: (index) => Array.from(values.keys())[index] ?? null,
+    removeItem: (key) => values.delete(key),
+    setItem: (key, value) => values.set(key, value),
+  };
+};
+
+test("serializeWidgetThemeStorageValue stores the two colors as encoded json", () => {
+  const serialized = serializeWidgetThemeStorageValue({
     color1: "#123456",
     color2: "#abcdef",
   });
@@ -24,9 +42,9 @@ test("serializeWidgetThemeCookie stores the two colors as encoded json", () => {
   assert.match(serialized, /abcdef/i);
 });
 
-test("parseWidgetThemeCookie restores a valid encoded theme", () => {
-  const parsed = parseWidgetThemeCookie(
-    serializeWidgetThemeCookie({
+test("parseWidgetThemeStorageValue restores a valid encoded theme", () => {
+  const parsed = parseWidgetThemeStorageValue(
+    serializeWidgetThemeStorageValue({
       color1: "#123456",
       color2: "#abcdef",
     })
@@ -38,12 +56,58 @@ test("parseWidgetThemeCookie restores a valid encoded theme", () => {
   });
 });
 
-test("parseWidgetThemeCookie falls back to default for invalid colors", () => {
-  const parsed = parseWidgetThemeCookie(
+test("parseWidgetThemeStorageValue falls back to default for invalid colors", () => {
+  const parsed = parseWidgetThemeStorageValue(
     encodeURIComponent(JSON.stringify({ color1: "red", color2: "#abcdef" }))
   );
 
   assert.deepEqual(parsed, DEFAULT_WIDGET_THEME);
+});
+
+test("readWidgetThemeFromStorage reads widgetTheme from localStorage", () => {
+  const storage = createStorage({
+    [WIDGET_THEME_STORAGE_KEY]: serializeWidgetThemeStorageValue({
+      color1: "#123456",
+      color2: "#abcdef",
+    }),
+  });
+
+  assert.deepEqual(readWidgetThemeFromStorage(storage), {
+    color1: "#123456",
+    color2: "#abcdef",
+  });
+});
+
+test("writeWidgetThemeToStorage writes widgetTheme to localStorage", () => {
+  const storage = createStorage();
+
+  writeWidgetThemeToStorage(storage, {
+    color1: "#123456",
+    color2: "#abcdef",
+  });
+
+  assert.equal(
+    storage.getItem(WIDGET_THEME_STORAGE_KEY),
+    serializeWidgetThemeStorageValue({
+      color1: "#123456",
+      color2: "#abcdef",
+    })
+  );
+});
+
+test("writeWidgetThemeToStorage ignores unavailable localStorage", () => {
+  const storage: Pick<Storage, "setItem"> = {
+    setItem: () => {
+      throw new Error("Storage unavailable");
+    },
+  };
+
+  assert.doesNotThrow(() =>
+    writeWidgetThemeToStorage(storage, {
+      color1: "#123456",
+      color2: "#abcdef",
+    })
+  );
 });
 
 test("withOpacity converts a hex color into rgba", () => {

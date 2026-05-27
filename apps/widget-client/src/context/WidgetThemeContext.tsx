@@ -1,9 +1,9 @@
 import { createContext, useEffect, useMemo, useState } from "react";
 import {
-  buildWidgetThemeCookie,
   DEFAULT_WIDGET_THEME,
-  readWidgetThemeFromCookieString,
+  readWidgetThemeFromStorage,
   WidgetTheme,
+  writeWidgetThemeToStorage,
 } from "../lib/widget-theme.js";
 
 export interface WidgetThemeContextValue {
@@ -22,7 +22,7 @@ export const WidgetThemeProvider = ({
   const [theme, setTheme] = useState<WidgetTheme>(DEFAULT_WIDGET_THEME);
 
   useEffect(() => {
-    setTheme(readWidgetThemeFromCookieString(document.cookie));
+    setTheme(readWidgetThemeFromStorage(window.localStorage));
   }, []);
 
   const value = useMemo<WidgetThemeContextValue>(
@@ -30,7 +30,7 @@ export const WidgetThemeProvider = ({
       theme,
       saveTheme: (nextTheme) => {
         setTheme(nextTheme);
-        document.cookie = buildWidgetThemeCookie(nextTheme);
+        writeWidgetThemeToStorage(window.localStorage, nextTheme);
       },
     }),
     [theme]
