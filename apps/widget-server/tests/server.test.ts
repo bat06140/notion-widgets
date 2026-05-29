@@ -62,7 +62,7 @@ test("widget access api returns denied access without leaking the license", asyn
     assert.deepEqual(receivedInput, { license: "BAD-KEY", widget: "calendar" });
     assert.deepEqual(payload, {
       accessGranted: false,
-      purchaseUrl: "https://atomicskills.academy/widgets-notion/",
+      purchaseUrl: "https://sindyatomic.gumroad.com/l/jtslmu",
       reason: "Licence introuvable",
     });
   });

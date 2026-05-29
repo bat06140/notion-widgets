@@ -238,7 +238,7 @@ test("Calendar hides the editor when the theme editor is disabled", () => {
     })
   );
 
-  assert.doesNotMatch(markup, /href="https:\/\/atomicskills\.academy\/widgets-notion\/"/);
+  assert.doesNotMatch(markup, /href="https:\/\/sindyatomic\.gumroad\.com\/l\/jtslmu"/);
   assert.doesNotMatch(markup, /Unlock premium theme customization/);
 });
 
@@ -252,7 +252,7 @@ test("Calendar threads access granted into the premium editor path", () => {
     })
   );
 
-  assert.doesNotMatch(markup, /href="https:\/\/atomicskills\.academy\/widgets-notion\/"/);
+  assert.doesNotMatch(markup, /href="https:\/\/sindyatomic\.gumroad\.com\/l\/jtslmu"/);
   assert.match(markup, /Open widget settings/);
 });
 
