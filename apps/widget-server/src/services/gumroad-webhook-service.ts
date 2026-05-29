@@ -38,12 +38,18 @@ export type GumroadWebhookProcessorOptions = {
   logger?: DebugLogger;
 };
 
-const ACTIVATION_WIDGETS: WidgetKey[] = ["calendar", "deadline", "clock"];
+const ACTIVATION_WIDGETS: WidgetKey[] = ["clock", "calendar", "deadline"];
 
 const WIDGET_PATHS: Record<WidgetKey, string> = {
   calendar: "calendar",
   deadline: "deadline",
   clock: "clock",
+};
+
+const WIDGET_LABELS: Record<WidgetKey, string> = {
+  calendar: "Calendar",
+  deadline: "Deadline",
+  clock: "Clock",
 };
 
 function normalizeString(value: unknown) {
@@ -104,12 +110,16 @@ function buildActivationEmail({
   to: string;
   activationUrls: string[];
 }): ActivationEmail {
-  const subject = "Vos liens d'activation premium";
+  const subject = "Your Branding Pack is ready — your licenses + access links";
   const [primaryActivationUrl] = activationUrls;
-  const textLinks = activationUrls.map((url) => `- ${url}`);
-  const htmlLinks = activationUrls.map((url) => {
-    const escapedUrl = escapeHtml(url);
-    return `<li><a href="${escapedUrl}">${escapedUrl}</a></li>`;
+  const linkItems = ACTIVATION_WIDGETS.map((widget, index) => ({
+    label: WIDGET_LABELS[widget],
+    url: activationUrls[index] ?? "",
+  })).filter((item) => item.url);
+  const textLinks = linkItems.map((item) => `- ${item.label}: ${item.url}`);
+  const htmlLinks = linkItems.map((item) => {
+    const escapedUrl = escapeHtml(item.url);
+    return `<li>${escapeHtml(item.label)}: <a href="${escapedUrl}">${escapedUrl}</a></li>`;
   });
 
   return {
@@ -118,18 +128,86 @@ function buildActivationEmail({
     activationUrl: primaryActivationUrl ?? "",
     activationUrls,
     text: [
-      "Merci pour votre achat.",
+      "🇬🇧 Branding Pack — 3 Notion Widgets in your brand colors (Clock + Calendar + Deadline)",
       "",
-      "Voici vos liens d'activation premium :",
+      "Hello,",
+      "",
+      "Thank you for your purchase — welcome to the Branding Pack (Clock + Calendar + Deadline).",
+      "Here are your activation links to install the 3 widgets:",
+      "",
       ...textLinks,
       "",
-      "Ouvrez le lien du widget souhaité dans Notion ou dans votre navigateur pour activer le mode premium.",
+      "Important: Your license is unique per purchase (one license code per order).",
+      "",
+      "How to install a widget (30 seconds)",
+      "",
+      "For each widget:",
+      "",
+      "- Copy the widget URL (with your license code)",
+      "- In Notion, paste the link into a new block",
+      "- Select Embed",
+      "- Resize + choose your colors (text/background) and you’re done",
+      "",
+      "Enjoy your new clean, on-brand Notion setup",
+      "",
+      "Sindy Desquerre | Atomic Skills Academy",
+      "Notion Ambassador • Certified trainer (Generative AI & active learning)",
+      "",
+      "---",
+      "",
+      "🇫🇷 Pack Branding — 3 Widgets Notion aux couleurs de votre marque (Horloge + Calendrier + Échéance)",
+      "",
+      "Bonjour,",
+      "",
+      "Merci pour votre achat — bienvenue dans le Pack Branding (Clock + Calendar + Deadline).",
+      "Voici les liens d’activation pour installer les 3 widgets du pack Branding :",
+      "",
+      ...textLinks,
+      "",
+      "Important : votre licence est unique par achat (un code de licence par commande).",
+      "",
+      "Comment installer un widget (30 secondes)",
+      "",
+      "Pour chaque widget :",
+      "",
+      "- Copiez l’URL du widget (avec votre code licence ci-dessus)",
+      "- Dans Notion, collez le lien dans un nouveau bloc",
+      "- Sélectionnez Intégration",
+      "- Ajustez la taille + choisissez vos couleurs (texte/fond)",
+      "",
+      "Profitez bien de votre Notion plus beau et plus cohérent.",
+      "",
+      "Besoin d’aide (ou envie de me montrer votre setup) ? Répondez simplement à cet email, je serai ravie de vous aider.",
+      "",
+      "Sindy DESQUERRE",
+      "Notion Ambassador • Formatrice certifiée en IA générative & pédagogie active",
+      "LinkedIn: https://www.linkedin.com/in/sindy-desquerre",
+      "atomicskills.academy: https://www.atomicskills.academy/",
+      "YouTube: https://www.youtube.com/@SindyAtomic",
     ].join("\n"),
     html: [
-      "<p>Merci pour votre achat.</p>",
-      "<p>Voici vos liens d'activation premium :</p>",
+      "<p><strong>🇬🇧 Branding Pack — 3 Notion Widgets in your brand colors (Clock + Calendar + Deadline)</strong></p>",
+      "<p>Hello,</p>",
+      "<p>Thank you for your purchase — welcome to the <strong>Branding Pack</strong> (Clock + Calendar + Deadline).<br>Here are your activation links to install the 3 widgets:</p>",
       `<ul>${htmlLinks.join("")}</ul>`,
-      "<p>Ouvrez le lien du widget souhaité dans Notion ou dans votre navigateur pour activer le mode premium.</p>",
+      "<p><strong>Important:</strong> Your license is <strong>unique per purchase</strong> (one license code per order).</p>",
+      "<p><strong>How to install a widget (30 seconds)</strong></p>",
+      "<p>For each widget:</p>",
+      "<ul><li>Copy the widget URL (with your license code)</li><li>In Notion, paste the link into a new block</li><li>Select <strong>Embed</strong></li><li>Resize + choose your colors (text/background) and you’re done</li></ul>",
+      "<p>Enjoy your new clean, on-brand Notion setup</p>",
+      "<p><strong>Sindy Desquerre | Atomic Skills Academy</strong><br>Notion Ambassador • Certified trainer (Generative AI & active learning)</p>",
+      "<hr>",
+      "<p><strong>🇫🇷 Pack Branding — 3 Widgets Notion aux couleurs de votre marque (Horloge + Calendrier + Échéance)</strong></p>",
+      "<p>Bonjour,</p>",
+      "<p>Merci pour votre achat — bienvenue dans le <strong>Pack Branding</strong> (Clock + Calendar + Deadline).<br>Voici les liens d’activation pour <strong>installer les 3 widgets du pack Branding :</strong></p>",
+      `<ul>${htmlLinks.join("")}</ul>`,
+      "<p><strong>Important :</strong> votre licence est <strong>unique par achat</strong> (un code de licence par commande).</p>",
+      "<h3>Comment installer un widget (30 secondes)</h3>",
+      "<p>Pour chaque widget :</p>",
+      "<ul><li>Copiez l’URL du widget (avec votre code licence ci-dessus)</li><li>Dans Notion, collez le lien dans un nouveau bloc</li><li>Sélectionnez <strong>Intégration</strong></li><li>Ajustez la taille + choisissez vos couleurs (texte/fond)</li></ul>",
+      "<p>Profitez bien de votre Notion plus beau et plus cohérent.</p>",
+      "<p>Besoin d’aide (ou envie de me montrer votre setup) ? Répondez simplement à cet email, je serai ravie de vous aider.</p>",
+      '<p><strong>Sindy DESQUERRE</strong><br>Notion Ambassador • Formatrice certifiée en IA générative & pédagogie active<br><a href="https://www.linkedin.com/in/sindy-desquerre">LinkedIn</a> | <a href="https://www.atomicskills.academy/">atomicskills.academy</a> | <a href="https://www.youtube.com/@SindyAtomic">YouTube</a></p>',
     ].join(""),
   };
 }

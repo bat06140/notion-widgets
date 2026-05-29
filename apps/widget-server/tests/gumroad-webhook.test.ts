@@ -39,20 +39,30 @@ test("Gumroad webhook processor emails all widget activation links once per sale
   assert.equal(emails[0]?.to, "buyer@example.com");
   assert.equal(emails[0]?.activationUrl, emails[0]?.activationUrls[0]);
   assert.deepEqual(emails[0]?.activationUrls, [
+    "https://widgets.atomicskills.academy/clock?license=SECRET-LICENSE",
     "https://widgets.atomicskills.academy/calendar?license=SECRET-LICENSE",
     "https://widgets.atomicskills.academy/deadline?license=SECRET-LICENSE",
-    "https://widgets.atomicskills.academy/clock?license=SECRET-LICENSE",
   ]);
-  assert.match(emails[0]?.subject ?? "", /activation/i);
+  assert.equal(
+    emails[0]?.subject,
+    "Your Branding Pack is ready — your licenses + access links"
+  );
+  assert.match(emails[0]?.text ?? "", /Branding Pack — 3 Notion Widgets/);
+  assert.match(emails[0]?.text ?? "", /Pack Branding — 3 Widgets Notion/);
+  assert.match(emails[0]?.text ?? "", /Important: Your license is unique per purchase/);
+  assert.match(emails[0]?.text ?? "", /Important : votre licence est unique par achat/);
   assert.match(emails[0]?.text ?? "", /https:\/\/widgets\.atomicskills\.academy\/calendar\?license=SECRET-LICENSE/);
   assert.match(emails[0]?.text ?? "", /https:\/\/widgets\.atomicskills\.academy\/deadline\?license=SECRET-LICENSE/);
   assert.match(emails[0]?.text ?? "", /https:\/\/widgets\.atomicskills\.academy\/clock\?license=SECRET-LICENSE/);
+  assert.match(emails[0]?.html ?? "", /<strong>🇬🇧 Branding Pack/);
+  assert.match(emails[0]?.html ?? "", /<hr>/);
+  assert.match(emails[0]?.html ?? "", /<strong>🇫🇷 Pack Branding/);
   assert.match(emails[0]?.html ?? "", /href="https:\/\/widgets\.atomicskills\.academy\/calendar\?license=SECRET-LICENSE"/);
   assert.match(emails[0]?.html ?? "", /href="https:\/\/widgets\.atomicskills\.academy\/deadline\?license=SECRET-LICENSE"/);
   assert.match(emails[0]?.html ?? "", /href="https:\/\/widgets\.atomicskills\.academy\/clock\?license=SECRET-LICENSE"/);
 });
 
-test("Gumroad webhook processor keeps calendar as the primary activation URL", async () => {
+test("Gumroad webhook processor keeps clock as the primary activation URL", async () => {
   const primaryActivationUrls: string[] = [];
   const processor = createGumroadWebhookProcessor({
     bundleProductId: "bundle-product",
@@ -72,7 +82,7 @@ test("Gumroad webhook processor keeps calendar as the primary activation URL", a
     { status: "sent" }
   );
   assert.deepEqual(primaryActivationUrls, [
-    "https://widgets.atomicskills.academy/calendar?license=BUNDLE-LICENSE",
+    "https://widgets.atomicskills.academy/clock?license=BUNDLE-LICENSE",
   ]);
 });
 
